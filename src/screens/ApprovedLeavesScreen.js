@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, FlatList, Text, ImageBackground, TouchableOpacity } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  FlatList,
+  Text,
+  ImageBackground,
+  TouchableOpacity,
+} from 'react-native';
+import {Calendar} from 'react-native-calendars';
 import axios from 'axios';
 import backgroundImg from '../assets/background.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ApprovedLeavesScreen = ({ route, navigation }) => {
-  const { userData } = route.params || {};
+const ApprovedLeavesScreen = ({route, navigation}) => {
+  const {userData} = route.params || {};
 
   const [markedDates, setMarkedDates] = useState({});
   const [presentDaysDetails, setPresentDaysDetails] = useState([]);
@@ -15,12 +23,15 @@ const ApprovedLeavesScreen = ({ route, navigation }) => {
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
-        const response = await axios.get('https://hrmfiles.com/api/attendance', {
-          headers: {
-            Authorization: `Bearer ${userData?.access_token}`,
-            'Content-Type': 'application/json',
+        const response = await axios.get(
+          'https://hrmfiles.com/api/attendance',
+          {
+            headers: {
+              Authorization: `Bearer ${userData?.access_token}`,
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         const data = response.data;
         const presentDays = data.present_days || {};
@@ -76,30 +87,34 @@ const ApprovedLeavesScreen = ({ route, navigation }) => {
     fetchAttendanceData();
   }, [userData]);
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     const dateObj = new Date(date);
-    const dayNameOptions = { weekday: 'short' };
-    const dayNumberOptions = { day: '2-digit' }; // Ensure two-digit format
+    const dayNameOptions = {weekday: 'short'};
+    const dayNumberOptions = {day: '2-digit'}; // Ensure two-digit format
 
     const dayName = dateObj.toLocaleDateString('en-US', dayNameOptions);
     const dayNumber = dateObj
       .toLocaleDateString('en-US', dayNumberOptions)
       .padStart(2, '0'); // Ensure two-digit format
 
-    return { dayName, dayNumber };
+    return {dayName, dayNumber};
   };
 
-  const formatTime = (time) => {
+  const formatTime = time => {
     if (!time) return 'N/A';
     const [hours, minutes] = time.split(':').map(Number);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}`;
   };
 
   const calculateTotalHours = (clockInTime, clockOutTime) => {
     if (!clockInTime || !clockOutTime) return 'N/A';
 
     const [clockInHours, clockInMinutes] = clockInTime.split(':').map(Number);
-    const [clockOutHours, clockOutMinutes] = clockOutTime.split(':').map(Number);
+    const [clockOutHours, clockOutMinutes] = clockOutTime
+      .split(':')
+      .map(Number);
 
     // Create date objects for clock-in and clock-out
     const clockIn = new Date();
@@ -128,7 +143,7 @@ const ApprovedLeavesScreen = ({ route, navigation }) => {
     return `${formattedHours}:${formattedMinutes}`;
   };
 
-  const isToday = (dateString) => {
+  const isToday = dateString => {
     const today = new Date();
     const date = new Date(dateString);
     return today.toDateString() === date.toDateString();
@@ -162,15 +177,17 @@ const ApprovedLeavesScreen = ({ route, navigation }) => {
           />
           <FlatList
             data={presentDaysDetails}
-            keyExtractor={(item) => item.date}
-            renderItem={({ item }) => {
-              const { dayName, dayNumber } = item.formattedDate;
-              const backgroundColor = isToday(item.date) ? '#E89C1E' : '#6FAB55'; // Orange for today, green for previous days
+            keyExtractor={item => item.date}
+            renderItem={({item}) => {
+              const {dayName, dayNumber} = item.formattedDate;
+              const backgroundColor = isToday(item.date)
+                ? '#E89C1E'
+                : '#6FAB55'; // Orange for today, green for previous days
 
               return (
                 <View style={styles.card}>
                   <View style={styles.row}>
-                    <View style={[styles.dateContainer, { backgroundColor }]}>
+                    <View style={[styles.dateContainer, {backgroundColor}]}>
                       <Text style={styles.dateText}>{dayNumber}</Text>
                       <Text style={styles.dayName}>{dayName}</Text>
                     </View>
@@ -191,7 +208,7 @@ const ApprovedLeavesScreen = ({ route, navigation }) => {
               );
             }}
             style={styles.list}
-            contentContainerStyle={{ flexGrow: 1 }} // Ensure the FlatList is scrollable
+            contentContainerStyle={{flexGrow: 1}} // Ensure the FlatList is scrollable
           />
         </View>
       </View>
@@ -236,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     elevation: 2, // for shadow on Android
     shadowColor: '#000', // for shadow on iOS
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },

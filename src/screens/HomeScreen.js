@@ -10,8 +10,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
@@ -25,7 +23,6 @@ import punchOutImage from '../assets/punchout.png';
 import frontImage from '../assets/Front.png';
 import clock from '../assets/clock.png';
 import clock1 from '../assets/clock1.png';
-import Geolocation from '@react-native-community/geolocation';
 
 const HomeScreen = ({route}) => {
   const {userData} = route.params || {};
@@ -38,9 +35,6 @@ const HomeScreen = ({route}) => {
   const [clockInTime, setClockInTime] = useState('');
   const [timePassed, setTimePassed] = useState('');
   const [clockInDateTime, setClockInDateTime] = useState(null);
-  const [isLocationAvailable, setIsLocationAvailable] = useState(false);
-  const [error, setError] = useState(null);
-  const [location, setLocation] = useState({latitude: null, longitude: null});
 
   // Load check-in status and clock-in timestamp from AsyncStorage
   useEffect(() => {
@@ -79,24 +73,7 @@ const HomeScreen = ({route}) => {
         );
       }
     };
-    const checkLocationPermission = async () => {
-      const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-      if (result === RESULTS.GRANTED) {
-        checkin();
-      } else {
-        const requestResult = await request(
-          PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-        );
-        if (requestResult === RESULTS.GRANTED) {
-          checkin();
-        } else {
-          Alert.alert(
-            'Permission Denied',
-            'Location permission is required for check-in',
-          );
-        }
-      }
-    };
+
     const checkInStatus = async () => {
       try {
         const response = await axios.get(
@@ -120,7 +97,7 @@ const HomeScreen = ({route}) => {
           response.data.attendance &&
           response.data.attendance.clock_in_time
         ) {
-          const { clock_in_time} = response.data.attendance;
+          const {clock_in_time} = response.data.attendance;
           // Combine date and time into a full timestamp
           const clockInDateTimeString = `${clock_in_time}`;
           const clockInDateTime = new Date(clockInDateTimeString);
@@ -224,73 +201,8 @@ const HomeScreen = ({route}) => {
       }, 1000);
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [hasCheckedIn, clockInDateTime]);
-  // Function to request location permission on Android
-  // const requestLocationPermission = async () => {
-  //   if (Platform.OS === 'android') {
-  //     try {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  //         {
-  //           title: 'Location Permission',
-  //           message: 'App needs access to your location',
-  //           buttonNeutral: 'Ask Me Later',
-  //           buttonNegative: 'Cancel',
-  //           buttonPositive: 'OK',
-  //         },
-  //       );
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log('You can use the location');
-  //         getLocation(); // Get location if permission is granted
-  //       } else {
-  //         console.log('Location permission denied');
-  //       }
-  //     } catch (err) {
-  //       console.warn(err);
-  //     }
-  //   } else {
-  //     getLocation(); // For iOS, directly get the location
-  //   }
-  // };
-  // Function to get the current location
-  // const getLocation = () => {
-  //   Geolocation.getCurrentPosition(
-  //     position => {
-  //       const {latitude, longitude} = position.coords;
-  //       console.log('Position: ', position);
-  //       setLocation({latitude, longitude}); // Set the location data in state
-  //       setIsLocationAvailable(true); // Mark location as available
-  //     },
-  //     error => {
-  //       console.log(error.code, error.message);
-  //       setError(error.message);
-  //       Alert.alert('Error', error.message);
-  //       setIsLocationAvailable(false);
-  //     },
-  //     {enableHighAccuracy: true, timeout: 60000, maximumAge: 30000},
-  //   );
-  // };
-  const checkLocationPermission = async () => {
-    const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-    if (result === RESULTS.GRANTED) {
-      handleCheckIn(); // If permission is granted, call check-in
-    } else {
-      const requestResult = await request(
-        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-      );
-      if (requestResult === RESULTS.GRANTED) {
-        handleCheckIn(); // If permission is granted after request, call check-in
-      } else {
-        Alert.alert(
-          'Permission Denied',
-          'Location permission is required for check-in',
-        );
-      }
-    }
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle Check-In
   const handleCheckIn = async () => {
@@ -299,73 +211,60 @@ const HomeScreen = ({route}) => {
       return;
     }
 
-    setLoading(true); // Show loading indicator
-    Geolocation.getCurrentPosition(
-      async position => {
-        const {longitude, latitude} = position.coords;
-        try {
-          const response = await axios.post(
-            'https://hrmfiles.com/api/attendance/checkinlocation',
-            {longitude, latitude},
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${userData?.access_token}`,
-              },
-            },
-          );
+    try {
+      const response = await axios.post(
+        'https://hrmfiles.com/api/attendance/checkin',
+        {
+          employee_id: userData.data.employee_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userData?.access_token}`,
+          },
+        },
+      );
+      const result = response.data;
 
-          const result = response.data;
-          if (result.message === 'Check-in successful') {
-            const {clock_in_time} = result.attendance;
-            const clockInDateTimeString = `${clock_in_time}`;
-            const clockInDateTime = new Date(clockInDateTimeString);
+      if (response.data && response.data.message === 'Check-in successful') {
+        const {clock_in_time} = result.attendance;
+        const clockInDateTimeString = `${clock_in_time}`;
+        const clockInDateTime = new Date(clockInDateTimeString);
+        setClockInDateTime(clockInDateTime);
+        setClockInTime(
+          new Intl.DateTimeFormat([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+          }).format(clockInDateTime),
+        );
+        setHasCheckedIn(true);
+        setTimePassed('00:00:00'); // Reset elapsed time to 0
+        // Save check-in status and time in AsyncStorage
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
+        await AsyncStorage.setItem(
+          'clockInDateTime',
+          clockInDateTime.toISOString(),
+        );
 
-            setClockInDateTime(clockInDateTime);
-            setClockInTime(
-              new Intl.DateTimeFormat([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true,
-              }).format(clockInDateTime),
-            );
-            setHasCheckedIn(true);
-            setTimePassed('00:00:00'); // Reset elapsed time to 0
-
-            // Save check-in status and time in AsyncStorage
-            await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
-            await AsyncStorage.setItem(
-              'clockInDateTime',
-              clockInDateTime.toISOString(),
-            );
-            Alert.alert(
-              'Check-In Success',
-              'You have successfully checked in.',
-            );
-          } else {
-            Alert.alert(
-              'Check-In Failed',
-              result.message || 'Please try again.',
-            );
-          }
-        } catch (error) {
-          console.error('Check-in Error:', error);
-          Alert.alert(
-            'Check-in Error',
-            'Unable to check in. Please try again later.',
-          );
-        } finally {
-          setLoading(false);
-        }
-      },
-      error => {
-        console.error('Geolocation Error:', error);
-        Alert.alert('Location Error', 'Unable to retrieve your location.');
-        setLoading(false);
-      },
-      {enableHighAccuracy: false, timeout: 60000, maximumAge: 10000},
-    );
+        // await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
+        // await AsyncStorage.setItem('clockInTime', clock_in_time);
+        // await AsyncStorage.setItem('timePassed', time_pass);
+        Alert.alert('Checked In', 'You have successfully checked in.');
+      } else {
+        Alert.alert('Check-in failed', 'Please try again later.');
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        Alert.alert('Already Checked In', 'You have already checked in.');
+      } else {
+        console.error('Check-in Error:', error);
+        Alert.alert(
+          'Check-in Error',
+          'An error occurred while checking in. Please try again later.',
+        );
+      }
+    }
   };
 
   // Handle Check-Out
@@ -411,7 +310,7 @@ const HomeScreen = ({route}) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
+        <ActivityIndicator size="large" color="#CA282C" />
       </View>
     );
   }
@@ -433,10 +332,9 @@ const HomeScreen = ({route}) => {
         </View>
         <Text style={styles.timeText}>{pakistanTime}</Text>
         <Text style={styles.dateText}>{pakistanDate}</Text>
-
         <TouchableOpacity
           style={styles.punchInButton}
-          onPress={hasCheckedIn ? handleCheckOut : checkLocationPermission}>
+          onPress={hasCheckedIn ? handleCheckOut : handleCheckIn}>
           <Image source={circle1} style={styles.circle1Image} />
           <Image source={circle2} style={styles.circle2Image} />
           <Text style={styles.punchInText}>
