@@ -33,44 +33,18 @@ const HomeScreen = ({route}) => {
   const [pakistanTime, setPakistanTime] = useState('');
   const [pakistanDate, setPakistanDate] = useState('');
   const [clockInTime, setClockInTime] = useState('');
-  const [timePassed, setTimePassed] = useState('');
+  const [timePassed, setTimePassed] = useState('00:00:00');
   const [clockInDateTime, setClockInDateTime] = useState(null);
 
-  // Load check-in status and clock-in timestamp from AsyncStorage
   useEffect(() => {
     const loadCheckInStatus = async () => {
       try {
         const status = await AsyncStorage.getItem('checkInStatus');
-        const savedClockInDateTime = await AsyncStorage.getItem(
-          'clockInDateTime',
-        );
-
         if (status !== null) {
           setHasCheckedIn(JSON.parse(status));
         }
-
-        if (savedClockInDateTime) {
-          const dateTime = new Date(savedClockInDateTime);
-          setClockInDateTime(dateTime);
-          // Format clock-in time for display
-          const timeFormatter = new Intl.DateTimeFormat([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-          });
-          const formattedClockInTime = timeFormatter.format(dateTime);
-          setClockInTime(formattedClockInTime);
-        }
-
-        // Remove time_pass from AsyncStorage as it will be calculated locally
-        await AsyncStorage.removeItem('timePassed');
-        setTimePassed('');
       } catch (error) {
-        console.error(
-          'Failed to load check-in status or clock-in time:',
-          error,
-        );
+        console.error('Failed to load check-in status:', error);
       }
     };
 
@@ -92,51 +66,53 @@ const HomeScreen = ({route}) => {
         setHasCheckedIn(checkedIn);
         await AsyncStorage.setItem('checkInStatus', JSON.stringify(checkedIn));
 
-        if (
-          checkedIn &&
-          response.data.attendance &&
-          response.data.attendance.clock_in_time
-        ) {
-          const {clock_in_time} = response.data.attendance;
-          // Combine date and time into a full timestamp
-          const clockInDateTimeString = `${clock_in_time}`;
-          const clockInDateTime = new Date(clockInDateTimeString);
-
+        if (checkedIn && response.data.attendance) {
+          const {clock_in_date, clock_in_time} = response.data.attendance;
+          const clockInDateTimeString = `${clock_in_date}T${clock_in_time}`; // Combine date and time
+          const clockInDateTime = new Date(clockInDateTimeString); // Create Date object
           setClockInDateTime(clockInDateTime);
-          await AsyncStorage.setItem(
-            'clockInDateTime',
-            clockInDateTime.toISOString(),
-          );
-
-          // Format clock-in time for display
-          const timeFormatter = new Intl.DateTimeFormat([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-          });
-          const formattedClockInTime = timeFormatter.format(clockInDateTime);
-          setClockInTime(formattedClockInTime);
-
-          // Initialize timePassed to zero
-          setTimePassed('00:00:00');
         }
       } catch (error) {
-        // console.error('Check-in Status Error:', error);
+        console.error('Check-in Status Error:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    const initialize = async () => {
-      await loadCheckInStatus();
-      await checkInStatus();
-    };
-
-    initialize();
+    loadCheckInStatus();
+    checkInStatus();
   }, [userData.access_token, userData.data.employee_id]);
 
-  // Update Pakistan time and date every second
+  useEffect(() => {
+    let interval = null;
+
+    if (hasCheckedIn && clockInDateTime) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const elapsed = now - clockInDateTime; // in milliseconds
+
+        if (elapsed < 0) {
+          setTimePassed('00:00:00');
+          return;
+        }
+
+        const totalSeconds = Math.floor(elapsed / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const formattedTime = `${String(hours).padStart(2, '0')}:${String(
+          minutes,
+        ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        setTimePassed(formattedTime);
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [hasCheckedIn, clockInDateTime]);
+
   useEffect(() => {
     const updatePakistanTimeAndDate = () => {
       const timeOptions = {
@@ -162,7 +138,6 @@ const HomeScreen = ({route}) => {
       const [time, period] = formattedTime.split(' ');
       const capitalizedPeriod = period ? period.toUpperCase() : '';
       setPakistanTime(`${time} ${capitalizedPeriod}`);
-
       setPakistanDate(dateFormatter.format(new Date()));
     };
 
@@ -172,39 +147,6 @@ const HomeScreen = ({route}) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate elapsed time since clock-in
-  useEffect(() => {
-    let interval = null;
-
-    if (hasCheckedIn && clockInDateTime) {
-      interval = setInterval(() => {
-        const now = new Date();
-        const elapsed = now - clockInDateTime; // in milliseconds
-
-        if (elapsed < 0) {
-          setTimePassed('00:00:00');
-          return;
-        }
-
-        const totalSeconds = Math.floor(elapsed / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        const formattedTime = `${String(hours).padStart(2, '0')}:${String(
-          minutes,
-        ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-        setTimePassed(formattedTime);
-        // Optionally, save to AsyncStorage if needed
-        // await AsyncStorage.setItem('timePassed', formattedTime);
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Handle Check-In
   const handleCheckIn = async () => {
     if (hasCheckedIn) {
       Alert.alert('Already Checked In', 'You have already checked in.');
@@ -219,37 +161,25 @@ const HomeScreen = ({route}) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${userData?.access_token}`,
+            Authorization: `Bearer ${userData.access_token}`,
           },
         },
       );
-      const result = response.data;
 
       if (response.data && response.data.message === 'Check-in successful') {
-        const {clock_in_time} = result.attendance;
-        const clockInDateTimeString = `${clock_in_time}`;
-        const clockInDateTime = new Date(clockInDateTimeString);
-        setClockInDateTime(clockInDateTime);
-        setClockInTime(
-          new Intl.DateTimeFormat([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-          }).format(clockInDateTime),
-        );
-        setHasCheckedIn(true);
-        setTimePassed('00:00:00'); // Reset elapsed time to 0
-        // Save check-in status and time in AsyncStorage
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
-        await AsyncStorage.setItem(
-          'clockInDateTime',
-          clockInDateTime.toISOString(),
-        );
+        const {clock_in_time, time_pass, clock_in_date} =
+          response.data.attendance;
+        const clockInDateTimeString = `${clock_in_date}T${clock_in_time}`;
+        const clockInDateTime = new Date(clockInDateTimeString); // Create Date object
 
-        // await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
-        // await AsyncStorage.setItem('clockInTime', clock_in_time);
-        // await AsyncStorage.setItem('timePassed', time_pass);
+        // Update states
+        setClockInTime(clock_in_time);
+        setTimePassed(time_pass);
+        setClockInDateTime(clockInDateTime); // Ensure this is set correctly
+        setHasCheckedIn(true);
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
+        await AsyncStorage.setItem('clockInTime', clock_in_time);
+        await AsyncStorage.setItem('timePassed', time_pass);
         Alert.alert('Checked In', 'You have successfully checked in.');
       } else {
         Alert.alert('Check-in failed', 'Please try again later.');
@@ -267,7 +197,6 @@ const HomeScreen = ({route}) => {
     }
   };
 
-  // Handle Check-Out
   const handleCheckOut = async () => {
     try {
       const response = await axios.post(
@@ -285,12 +214,11 @@ const HomeScreen = ({route}) => {
       if (response.data && response.data.message === 'Check-out successful') {
         setHasCheckedIn(false);
         setClockInTime('');
-        setTimePassed('');
-        setClockInDateTime(null);
+        setTimePassed('00:00:00');
         await AsyncStorage.setItem('checkInStatus', JSON.stringify(false));
-        await AsyncStorage.removeItem('clockInDateTime');
-        // Remove time_pass if it was stored
+        await AsyncStorage.removeItem('clockInTime');
         await AsyncStorage.removeItem('timePassed');
+        await AsyncStorage.removeItem('clockInDateTime');
         Alert.alert('Checked Out', 'You have successfully checked out.');
       } else {
         Alert.alert('Check-out failed', 'Please try again later.');
@@ -303,14 +231,13 @@ const HomeScreen = ({route}) => {
       );
     }
   };
-
   const imageUrl =
     userData.data.image_url || 'https://example.com/fallback-image.png';
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#CA282C" />
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }
@@ -332,6 +259,7 @@ const HomeScreen = ({route}) => {
         </View>
         <Text style={styles.timeText}>{pakistanTime}</Text>
         <Text style={styles.dateText}>{pakistanDate}</Text>
+
         <TouchableOpacity
           style={styles.punchInButton}
           onPress={hasCheckedIn ? handleCheckOut : handleCheckIn}>
@@ -361,7 +289,7 @@ const HomeScreen = ({route}) => {
           <View style={styles.clockContainer}>
             <Image source={clock1} style={styles.clockImage} />
             <Text style={styles.clockInTimeText}>
-              {timePassed ? timePassed : '00:00:00'}
+              {hasCheckedIn && timePassed ? timePassed : '00:00:00'}
             </Text>
             <Text style={styles.clockText}>Total Hours</Text>
           </View>
@@ -375,24 +303,15 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     padding: 20,
     alignItems: 'center',
     alignContent: 'center',
-    flex: 1,
-    justifyContent: 'center',
   },
   profileContainer: {
     flexDirection: 'row',
+    marginLeft: -55,
     marginBottom: 70,
-    alignItems: 'center',
-    width: '100%',
-    position: 'relative', // To position the notification icon correctly
   },
   profile: {
     marginTop: 10,
@@ -408,14 +327,24 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     position: 'absolute',
-    right: 0, // Adjusted to position correctly
+    left: 300,
     top: -10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
   },
   image: {
     width: 70,
     height: 70,
     marginRight: 10,
     borderRadius: 50,
+  },
+  info: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: 'black',
   },
   timeText: {
     fontSize: 50,
@@ -429,9 +358,6 @@ const styles = StyleSheet.create({
   punchInButton: {
     marginTop: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    width: 200, // Adjust as needed
-    height: 200, // Adjust as needed
   },
   circle1Image: {
     position: 'absolute',
@@ -446,10 +372,10 @@ const styles = StyleSheet.create({
     top: 40,
   },
   punchInText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 120,
+    marginTop: 140,
   },
   handImage: {
     position: 'absolute',
@@ -466,7 +392,7 @@ const styles = StyleSheet.create({
   // Styles for the clock row and images
   clockRow: {
     flexDirection: 'row',
-    marginTop: 70,
+    marginTop: 120,
     justifyContent: 'space-around',
     width: '100%',
     paddingHorizontal: 20,
@@ -485,6 +411,7 @@ const styles = StyleSheet.create({
   clockContainer: {
     alignItems: 'center',
   },
+
   clockText: {
     color: '#666',
   },

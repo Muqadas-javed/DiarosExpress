@@ -7,7 +7,6 @@ import {
   Alert,
   ImageBackground,
   TouchableOpacity,
-  Share,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -56,7 +55,7 @@ const PayslipScreen = ({route, navigation}) => {
       if (!userData) {
         throw new Error('User data is not available.');
       }
-  
+
       const htmlContent = `
         <div style="text-align: center; margin-bottom: 140px;">
           <h1 style="font-size: 40px; color: #555; margin-bottom: 10px; font-weight: bold;">Payslip</h1>
@@ -64,7 +63,9 @@ const PayslipScreen = ({route, navigation}) => {
           <p style="font-size: 24px; color: #555;">Civic Center Bahria Phase 4</p>
         </div>
         
-        <h2 style="font-size: 40px; color: #CA282C; margin-bottom: 50px; font-weight: bold;">${payslipData?.name || 'N/A'}</h2>
+        <h2 style="font-size: 40px; color: #CA282C; margin-bottom: 50px; font-weight: bold;">${
+          payslipData?.name || 'N/A'
+        }</h2>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
           <tr style="background-color: #CA282C; color: white;">
             <th style="border: 1px solid #ddd; padding: 14px; text-align: left;">Description</th>
@@ -74,34 +75,50 @@ const PayslipScreen = ({route, navigation}) => {
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Salary</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.salary || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.salary || 'N/A'
+            }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Deduction Per Day</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.absent_days_deduction || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.absent_days_deduction || 'N/A'
+            }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Absent Days</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.total_absent_days}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.total_absent_days
+            }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Deduction Per Hour</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.Late_hours_deduction || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.Late_hours_deduction || 'N/A'
+            }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Leave Days</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.paid_leaves }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.paid_leaves
+            }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Total Deduction</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.total_deduction || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.total_deduction || 'N/A'
+            }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Bonus</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.bonus || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.bonus || 'N/A'
+            }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Net Salary</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.net_salary || 'N/A'}</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${
+              payslipData?.net_salary || 'N/A'
+            }</td>
           </tr>
         </table>
         <div style="text-align: right; margin-bottom: 100px;font-size: 34px font-weight: medium">
 
         <h2>Net Pay: ${payslipData?.net_salary || 'N/A'}</h2>
         </div>      `;
-  
+
       const options = {
         html: `
           <html>
@@ -124,7 +141,7 @@ const PayslipScreen = ({route, navigation}) => {
         fileName: 'Payslip',
         directory: 'Documents',
       };
-  
+
       const file = await RNHTMLtoPDF.convert(options);
       Alert.alert('PDF generated at:', file.filePath);
       console.log('PDF generated at:', file.filePath);
@@ -133,7 +150,6 @@ const PayslipScreen = ({route, navigation}) => {
       Alert.alert('Error', error.message || 'Could not generate PDF');
     }
   };
-  
 
   const renderPayslipDetails = () => (
     <View style={styles.cardContainer}>
@@ -295,11 +311,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    paddingLeft:10,
+    paddingLeft: 10,
   },
   downloadButton: {
     paddingHorizontal: 10,
-    paddingLeft:120,
+    paddingLeft: 120,
   },
   cardContainer: {
     backgroundColor: '#f9f9f9',

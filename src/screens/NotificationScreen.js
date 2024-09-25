@@ -1,5 +1,4 @@
-// src/screens/NotificationScreen.js
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,13 +7,13 @@ import {
   ActivityIndicator,
   ImageBackground,
   TouchableOpacity,
-  Alert
+  Alert,
 } from 'react-native';
 import backgroundImg from '../assets/background.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const NotificationScreen = ({ route, navigation }) => {
-  const { userData } = route.params || {};
+const NotificationScreen = ({route, navigation}) => {
+  const {userData} = route.params || {};
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,24 +30,19 @@ const NotificationScreen = ({ route, navigation }) => {
         },
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response URL:', response.url);
-
       const text = await response.text();
 
       if (response.headers.get('content-type')?.includes('application/json')) {
         const json = JSON.parse(text);
-        // Sort notifications by date, newest first
         const sortedNotifications = json.announcements.sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
+          (a, b) => new Date(b.date) - new Date(a.date),
         );
         setNotifications(sortedNotifications);
       } else {
-        console.error('Received non-JSON response:', text);
         Alert.alert(
           'Error',
           'Unable to fetch notifications. The server returned a non-JSON response.',
-          [{ text: 'OK' }]
+          [{text: 'OK'}],
         );
       }
     } catch (error) {
@@ -56,22 +50,76 @@ const NotificationScreen = ({ route, navigation }) => {
       Alert.alert(
         'Error',
         'An error occurred while fetching notifications. Please try again later.',
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const renderItem = ({ item }) => {
-    // Format the date in a more appealing way
+  const deleteNotification = async id => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this notification?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            try {
+              // Make DELETE request to remove the notification
+              const response = await fetch(
+                `https://hrmfiles.com/api/announcement/${id}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    Authorization: `Bearer ${userData.access_token}`,
+                    'Content-Type': 'application/json',
+                  },
+                },
+              );
+
+              if (response.ok) {
+                // Update local state if deletion is successful
+                setNotifications(prevNotifications =>
+                  prevNotifications.filter(
+                    notification => notification.id !== id,
+                  ),
+                );
+                Alert.alert('Success', 'Notification deleted successfully.', [
+                  {text: 'OK'},
+                ]);
+              } else {
+                Alert.alert(
+                  'Error',
+                  'Failed to delete notification. Please try again.',
+                  [{text: 'OK'}],
+                );
+              }
+            } catch (error) {
+              console.error('Error deleting notification:', error);
+              Alert.alert(
+                'Error',
+                'An error occurred while deleting the notification. Please try again later.',
+                [{text: 'OK'}],
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const renderItem = ({item}) => {
     const formattedDate = new Date(item.date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
 
-    // Check if the notification date is in the future
     const isFutureDate = new Date(item.date) > new Date();
 
     return (
@@ -79,19 +127,22 @@ const NotificationScreen = ({ route, navigation }) => {
         <View
           style={[
             styles.statusIcon,
-            { backgroundColor: isFutureDate ? 'green' : 'orange' },
+            {backgroundColor: isFutureDate ? 'green' : 'orange'},
           ]}
         />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>
-            {item.title}
-          </Text>
+        <View style={{flex: 1}}>
+          <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.message}>{item.message}</Text>
           <View style={styles.footer}>
             <Text style={styles.date}>{formattedDate}</Text>
             <Text style={styles.employeeName}>{item.employee_name}</Text>
           </View>
         </View>
+        <TouchableOpacity
+          onPress={() => deleteNotification(item.id)}
+          style={styles.delete}>
+          <Ionicons name="trash" size={20} color="#CA282C" />
+        </TouchableOpacity>
       </View>
     );
   };
@@ -110,7 +161,7 @@ const NotificationScreen = ({ route, navigation }) => {
         ) : (
           <FlatList
             data={notifications}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={item => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
           />
@@ -144,17 +195,22 @@ const styles = StyleSheet.create({
   list: {
     paddingBottom: 20,
   },
+  delete: {
+    paddingBottom: 45,
+  },
   notificationCard: {
     backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   statusIcon: {
     width: 20,
@@ -165,10 +221,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black', // Default color for past and current dates
-  },
-  futureTitle: {
-    color: 'black', // Color for future dates
+    color: 'black',
   },
   message: {
     fontSize: 14,
