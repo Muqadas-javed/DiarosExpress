@@ -40,49 +40,33 @@ const HomeScreen = ({route}) => {
     const loadCheckInStatus = async () => {
       try {
         const status = await AsyncStorage.getItem('checkInStatus');
-        if (status !== null) {
-          setHasCheckedIn(JSON.parse(status));
-        }
-      } catch (error) {
-        console.error('Failed to load check-in status:', error);
-      }
-    };
-
-    const checkInStatus = async () => {
-      try {
-        const response = await axios.get(
-          'https://hrmfiles.com/api/attendance/status',
-          {
-            headers: {
-              Authorization: `Bearer ${userData.access_token}`,
-            },
-            params: {
-              employee_id: userData.data.employee_id,
-            },
-          },
+        const storedClockInDateTime = await AsyncStorage.getItem(
+          'clockInDateTime',
         );
 
-        const checkedIn = response.data.checked_in;
-        setHasCheckedIn(checkedIn);
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(checkedIn));
+        if (status !== null) {
+          const checkedIn = JSON.parse(status);
+          setHasCheckedIn(checkedIn);
 
-        if (checkedIn && response.data.attendance) {
-          const {clock_in_date, clock_in_time} = response.data.attendance;
-          const clockInDateTimeString = `${clock_in_date}T${clock_in_time}`; // Combine date and time
-          const clockInDateTime = new Date(clockInDateTimeString); // Create Date object
-          setClockInDateTime(clockInDateTime);
+          // If checked in, retrieve clockInDateTime
+          if (checkedIn && storedClockInDateTime) {
+            const clockInDateTime = new Date(storedClockInDateTime);
+            setClockInDateTime(clockInDateTime);
+          }
         }
       } catch (error) {
-        console.error('Check-in Status Error:', error);
+        console.error(
+          'Failed to load check-in status or clock-in time:',
+          error,
+        );
       } finally {
         setLoading(false);
       }
     };
 
     loadCheckInStatus();
-    checkInStatus();
-  }, [userData.access_token, userData.data.employee_id]);
-
+  }, []);
+  // calculating time pass
   useEffect(() => {
     let interval = null;
 
@@ -105,6 +89,12 @@ const HomeScreen = ({route}) => {
           minutes,
         ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         setTimePassed(formattedTime);
+
+        // Auto check-out if timePassed exceeds 12:00:00 (43200 seconds)
+        if (totalSeconds >= 43200) {
+          handleCheckOut();
+          clearInterval(interval); // Clear interval once checked out
+        }
       }, 1000);
     }
 
@@ -176,10 +166,12 @@ const HomeScreen = ({route}) => {
         setClockInTime(clock_in_time);
         setTimePassed(time_pass);
         setClockInDateTime(clockInDateTime); // Ensure this is set correctly
-        setHasCheckedIn(true);
+
+        // Save clockInDateTime and checkInStatus to AsyncStorage
+        await AsyncStorage.setItem('clockInDateTime', clockInDateTimeString);
         await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
-        await AsyncStorage.setItem('clockInTime', clock_in_time);
-        await AsyncStorage.setItem('timePassed', time_pass);
+        setHasCheckedIn(true);
+
         Alert.alert('Checked In', 'You have successfully checked in.');
       } else {
         Alert.alert('Check-in failed', 'Please try again later.');
@@ -215,10 +207,11 @@ const HomeScreen = ({route}) => {
         setHasCheckedIn(false);
         setClockInTime('');
         setTimePassed('00:00:00');
+
+        // Clear the AsyncStorage items related to check-in
         await AsyncStorage.setItem('checkInStatus', JSON.stringify(false));
-        await AsyncStorage.removeItem('clockInTime');
-        await AsyncStorage.removeItem('timePassed');
         await AsyncStorage.removeItem('clockInDateTime');
+
         Alert.alert('Checked Out', 'You have successfully checked out.');
       } else {
         Alert.alert('Check-out failed', 'Please try again later.');
@@ -231,6 +224,7 @@ const HomeScreen = ({route}) => {
       );
     }
   };
+
   const imageUrl =
     userData.data.image_url || 'https://example.com/fallback-image.png';
 
