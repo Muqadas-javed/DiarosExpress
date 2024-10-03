@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: 'gray',
   },
   timeValue: {

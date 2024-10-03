@@ -25,23 +25,39 @@ const LeaveDetailsScreen = ({route, navigation}) => {
     try {
       const response = await fetch('https://hrmfiles.com/api/leaves', {
         headers: {
-          Authorization: `Bearer ${userData?.access_token}`, // Corrected string interpolation
+          Authorization: `Bearer ${userData?.access_token}`,
         },
       });
+
+      // Check for response status
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        if (response.status === 404) {
+          // Handle case where no leave records are found (404 Not Found)
+          setLeaveData([]);
+          return;
+        } else {
+          throw new Error('Network response was not ok');
+        }
       }
+
       const data = await response.json();
-      setLeaveData(Array.isArray(data) ? data : []); // Ensure leaveData is always an array
+
+      // Check if data is an array and set state accordingly
+      setLeaveData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching leave data:', error);
       Alert.alert('Error', 'An error occurred while fetching leave data.');
-      if (error.message === 'Network response was not ok') {
+
+      // Handle session expiration or unauthorized access
+      if (
+        error.message === 'Network response was not ok' ||
+        error.status === 401
+      ) {
         Alert.alert(
           'Unauthorized',
           'Your session has expired. Please log in again.',
         );
-        navigation.navigate('Login'); // Redirect to the login screen
+        navigation.navigate('Login');
       }
     } finally {
       setLoading(false);

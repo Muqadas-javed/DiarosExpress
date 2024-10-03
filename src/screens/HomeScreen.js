@@ -1,18 +1,21 @@
-import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
   Alert,
-  ActivityIndicator,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from 'react-native-geolocation-service';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {Platform} from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
 
 // Import your images
 import backgroundImg from '../assets/background.png';
@@ -28,14 +31,82 @@ const HomeScreen = ({route}) => {
   const {userData} = route.params || {};
   const navigation = useNavigation();
 
+  const [loading, setLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [userCurrentLocation, setUserCurrentLocation] = useState(null);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [pakistanTime, setPakistanTime] = useState('');
-  const [pakistanDate, setPakistanDate] = useState('');
-  const [clockInTime, setClockInTime] = useState('');
-  const [timePassed, setTimePassed] = useState('00:00:00');
   const [clockInDateTime, setClockInDateTime] = useState(null);
+  const [pakistanDate, setPakistanDate] = useState('');
+  const [pakistanTime, setPakistanTime] = useState('');
+  const [timePassed, setTimePassed] = useState('00:00:00');
 
+  const [clockInTime, setClockInTime] = useState('');
+
+  // Function to get location permission
+  const getLocationPermission = async () => {
+    let permission;
+
+    if (Platform.OS === 'ios') {
+      permission = PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+    } else if (Platform.OS === 'android') {
+      permission = PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+    }
+
+    const result = await check(permission);
+    if (result === RESULTS.GRANTED) {
+      return true;
+    }
+
+    const requestResult = await request(permission);
+    return requestResult === RESULTS.GRANTED;
+  };
+
+  // Function to get location
+  const getLocation = async () => {
+    const isLocationEnabled = await getLocationPermission();
+    if (isLocationEnabled) {
+      setLocationLoading(true);
+      Geolocation.getCurrentPosition(
+        position => {
+          const loc = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setUserCurrentLocation(loc);
+          setLocationLoading(false);
+        },
+        error => {
+          console.error(error);
+          Alert.alert('Error', 'Failed to get location');
+          setLocationLoading(false);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 60000,
+        },
+      );
+    } else {
+      Alert.alert('Permission Denied', 'Location permission not granted.');
+    }
+  };
+
+  // Pre-fetch location and check-in status on screen load
+  useEffect(() => {
+    const fetchCheckInStatus = async () => {
+      try {
+        const storedCheckInStatus = await AsyncStorage.getItem('checkInStatus');
+        if (storedCheckInStatus !== null) {
+          setHasCheckedIn(JSON.parse(storedCheckInStatus));
+        }
+      } catch (error) {
+        console.error('Failed to fetch check-in status', error);
+      }
+    };
+
+    fetchCheckInStatus();
+    getLocation();
+  }, []);
   useEffect(() => {
     const loadCheckInStatus = async () => {
       try {
@@ -137,6 +208,7 @@ const HomeScreen = ({route}) => {
     return () => clearInterval(interval);
   }, []);
 
+  // Function to handle Check-In
   const handleCheckIn = async () => {
     if (hasCheckedIn) {
       Alert.alert('Already Checked In', 'You have already checked in.');
@@ -145,9 +217,11 @@ const HomeScreen = ({route}) => {
 
     try {
       const response = await axios.post(
-        'https://hrmfiles.com/api/attendance/checkin',
+        'https://hrmfiles.com/api/attendance/checkinlocation',
         {
           employee_id: userData.data.employee_id,
+          latitude: userCurrentLocation.latitude,
+          longitude: userCurrentLocation.longitude,
         },
         {
           headers: {
@@ -157,39 +231,35 @@ const HomeScreen = ({route}) => {
       );
 
       if (response.data && response.data.message === 'Check-in successful') {
-        const {clock_in_time, time_pass, clock_in_date} =
-          response.data.attendance;
-        const clockInDateTimeString = `${clock_in_date}T${clock_in_time}`;
-        const clockInDateTime = new Date(clockInDateTimeString); // Create Date object
+        const {check_in_time, time_passed, clock_in_date} =
+          response.data.employee; // Corrected access to employee object
+        const clockInDateTimeString = `${clock_in_date}T${check_in_time}`;
+        const clockInDateTime = new Date(clockInDateTimeString);
 
         // Update states
-        setClockInTime(clock_in_time);
-        setTimePassed(time_pass);
+        setClockInTime(check_in_time);
+        setTimePassed(time_passed);
         setClockInDateTime(clockInDateTime); // Ensure this is set correctly
 
         // Save clockInDateTime and checkInStatus to AsyncStorage
         await AsyncStorage.setItem('clockInDateTime', clockInDateTimeString);
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true)); // Save status
         setHasCheckedIn(true);
-
-        Alert.alert('Checked In', 'You have successfully checked in.');
+        Alert.alert('Check-In Successful', 'You have successfully checked in.');
       } else {
-        Alert.alert('Check-in failed', 'Please try again later.');
+        Alert.alert('Check-In Failed', 'Please try again later.');
       }
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        Alert.alert('Already Checked In', 'You have already checked in.');
-      } else {
-        console.error('Check-in Error:', error);
-        Alert.alert(
-          'Check-in Error',
-          'An error occurred while checking in. Please try again later.',
-        );
-      }
+      console.error('Check-In Error:', error.response?.data || error.message);
+      Alert.alert('Check-In Error', 'An error occurred during check-in.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Function to handle Check-Out
   const handleCheckOut = async () => {
+    setLoading(true);
     try {
       const response = await axios.post(
         'https://hrmfiles.com/api/attendance/checkout',
@@ -207,11 +277,9 @@ const HomeScreen = ({route}) => {
         setHasCheckedIn(false);
         setClockInTime('');
         setTimePassed('00:00:00');
-
-        // Clear the AsyncStorage items related to check-in
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(false));
-        await AsyncStorage.removeItem('clockInDateTime');
-
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(false)); // Save status
+        setClockInTime('');
+        setTimePassed('00:00:00');
         Alert.alert('Checked Out', 'You have successfully checked out.');
       } else {
         Alert.alert('Check-out failed', 'Please try again later.');
@@ -222,6 +290,8 @@ const HomeScreen = ({route}) => {
         'Check-out Error',
         'An error occurred while checking out. Please try again later.',
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -303,9 +373,10 @@ const styles = StyleSheet.create({
     alignContent: 'center',
   },
   profileContainer: {
+    marginTop: 10,
     flexDirection: 'row',
     marginLeft: -55,
-    marginBottom: 70,
+    marginBottom: 50,
   },
   profile: {
     marginTop: 10,
@@ -321,7 +392,7 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     position: 'absolute',
-    left: 300,
+    left: 290,
     top: -10,
   },
   title: {
@@ -334,11 +405,6 @@ const styles = StyleSheet.create({
     height: 70,
     marginRight: 10,
     borderRadius: 50,
-  },
-  info: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: 'black',
   },
   timeText: {
     fontSize: 50,
@@ -386,10 +452,10 @@ const styles = StyleSheet.create({
   // Styles for the clock row and images
   clockRow: {
     flexDirection: 'row',
-    marginTop: 120,
+    marginTop: 105,
     justifyContent: 'space-around',
     width: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   clockImage: {
     width: 40,
