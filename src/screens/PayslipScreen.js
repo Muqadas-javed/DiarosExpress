@@ -269,14 +269,14 @@ const PayslipScreen = ({route, navigation}) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={26} color="black" />
           </TouchableOpacity>
-          <Text style={styles.headerText}>Payslip Details</Text>
+          <Text style={styles.headerText}>Payslip </Text>
           <TouchableOpacity onPress={generatePDF} style={styles.downloadButton}>
             <Entypo name="download" size={26} color="#CA282C" />
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#CA282C" />
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Error: {error}</Text>

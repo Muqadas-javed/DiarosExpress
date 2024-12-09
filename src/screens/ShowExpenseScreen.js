@@ -90,7 +90,7 @@ const ShowExpenseScreen = ({ navigation }) => {
       </View>
       <View style={styles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color="#007bff" style={styles.loader} />
+          <ActivityIndicator size="large" color="#CA282C" style={styles.loader} />
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
@@ -160,8 +160,8 @@ const styles = StyleSheet.create({
   },
   itemImage: {
     width: '100%',
-    height: 100,
-    resizeMode:'cover',
+    height: 90,
+    resizeMode:'contain',
     borderRadius:40,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,

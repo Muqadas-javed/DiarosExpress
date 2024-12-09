@@ -29,10 +29,8 @@ const LeaveDetailsScreen = ({route, navigation}) => {
         },
       });
 
-      // Check for response status
       if (!response.ok) {
         if (response.status === 404) {
-          // Handle case where no leave records are found (404 Not Found)
           setLeaveData([]);
           return;
         } else {
@@ -41,14 +39,10 @@ const LeaveDetailsScreen = ({route, navigation}) => {
       }
 
       const data = await response.json();
-
-      // Check if data is an array and set state accordingly
       setLeaveData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching leave data:', error);
       Alert.alert('Error', 'An error occurred while fetching leave data.');
-
-      // Handle session expiration or unauthorized access
       if (
         error.message === 'Network response was not ok' ||
         error.status === 401
@@ -78,10 +72,9 @@ const LeaveDetailsScreen = ({route, navigation}) => {
               const response = await fetch(
                 `https://hrmfiles.com/api/leaves/${id}`,
                 {
-                  // Corrected string interpolation for URL
                   method: 'DELETE',
                   headers: {
-                    Authorization: `Bearer ${userData?.access_token}`, // Corrected string interpolation
+                    Authorization: `Bearer ${userData?.access_token}`,
                   },
                 },
               );
@@ -89,7 +82,7 @@ const LeaveDetailsScreen = ({route, navigation}) => {
                 throw new Error('Network response was not ok');
               }
               Alert.alert('Deleted', 'Leave request has been deleted.');
-              fetchLeaveData(); // Refresh the list after deletion
+              fetchLeaveData();
             } catch (error) {
               console.error('Error deleting leave request:', error);
               Alert.alert(
@@ -144,9 +137,16 @@ const LeaveDetailsScreen = ({route, navigation}) => {
             <Ionicons name="chevron-back" size={20} color="black" />
           </TouchableOpacity>
           <Text style={styles.headerText}>Leave Details</Text>
+          {/* Add Button */}
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('LeaveRequest', {userData})}>
+            <Text style={styles.addButtonText}>ADD</Text>
+            <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#CA282C" />
         ) : leaveData.length === 0 ? (
           <Text style={styles.noRecordText}>No leave record found</Text>
         ) : (
@@ -202,6 +202,21 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#CA282C',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginLeft: 'auto',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
   },
   statusIcon: {
     width: 20,

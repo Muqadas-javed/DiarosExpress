@@ -8,9 +8,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import Geolocation from 'react-native-geolocation-service';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-import {Platform} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -32,8 +29,6 @@ const HomeScreen = ({route}) => {
   const navigation = useNavigation();
 
   const [loading, setLoading] = useState(false);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [userCurrentLocation, setUserCurrentLocation] = useState(null);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [clockInDateTime, setClockInDateTime] = useState(null);
   const [pakistanDate, setPakistanDate] = useState('');
@@ -42,138 +37,88 @@ const HomeScreen = ({route}) => {
 
   const [clockInTime, setClockInTime] = useState('');
 
-  // Function to get location permission
-  const getLocationPermission = async () => {
-    let permission;
+  
+  
 
-    if (Platform.OS === 'ios') {
-      permission = PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
-    } else if (Platform.OS === 'android') {
-      permission = PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
-    }
-
-    const result = await check(permission);
-    if (result === RESULTS.GRANTED) {
-      return true;
-    }
-
-    const requestResult = await request(permission);
-    return requestResult === RESULTS.GRANTED;
-  };
-
-  // Function to get location
-  const getLocation = async () => {
-    const isLocationEnabled = await getLocationPermission();
-    if (isLocationEnabled) {
-      setLocationLoading(true);
-      Geolocation.getCurrentPosition(
-        position => {
-          const loc = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          setUserCurrentLocation(loc);
-          setLocationLoading(false);
-        },
-        error => {
-          console.error(error);
-          Alert.alert('Error', 'Failed to get location');
-          setLocationLoading(false);
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 10000,
-          maximumAge: 60000,
-        },
-      );
-    } else {
-      Alert.alert('Permission Denied', 'Location permission not granted.');
-    }
-  };
-
-  // Pre-fetch location and check-in status on screen load
-  useEffect(() => {
-    const fetchCheckInStatus = async () => {
-      try {
-        const storedCheckInStatus = await AsyncStorage.getItem('checkInStatus');
-        if (storedCheckInStatus !== null) {
-          setHasCheckedIn(JSON.parse(storedCheckInStatus));
-        }
-      } catch (error) {
-        console.error('Failed to fetch check-in status', error);
-      }
-    };
-
-    fetchCheckInStatus();
-    getLocation();
-  }, []);
+  
   useEffect(() => {
     const loadCheckInStatus = async () => {
       try {
         const status = await AsyncStorage.getItem('checkInStatus');
-        const storedClockInDateTime = await AsyncStorage.getItem(
-          'clockInDateTime',
-        );
-
+        const storedClockInDateTime = await AsyncStorage.getItem('clockInDateTime');
+        const storedClockInTime = await AsyncStorage.getItem('clockInTime'); // Retrieve clock_in_time from AsyncStorage
+  
         if (status !== null) {
           const checkedIn = JSON.parse(status);
           setHasCheckedIn(checkedIn);
-
-          // If checked in, retrieve clockInDateTime
+  
+          // If checked in, retrieve clockInDateTime and clockInTime
           if (checkedIn && storedClockInDateTime) {
             const clockInDateTime = new Date(storedClockInDateTime);
             setClockInDateTime(clockInDateTime);
           }
+  
+          // Set clockInTime from AsyncStorage if available
+          if (storedClockInTime) {
+            setClockInTime(storedClockInTime); // Update clockInTime state
+          }
         }
       } catch (error) {
-        console.error(
-          'Failed to load check-in status or clock-in time:',
-          error,
-        );
+        console.error('Failed to load check-in status or clock-in time:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     loadCheckInStatus();
   }, []);
+  
   // calculating time pass
   useEffect(() => {
     let interval = null;
-
+  
     if (hasCheckedIn && clockInDateTime) {
       interval = setInterval(() => {
         const now = new Date();
         const elapsed = now - clockInDateTime; // in milliseconds
-
-        if (elapsed < 0) {
+  
+        // Calculate the total seconds elapsed
+        const totalSeconds = Math.floor(elapsed / 1000); 
+  
+        // Log the elapsed time in seconds
+        // console.log('Elapsed Time (seconds):', totalSeconds);
+  
+        if (totalSeconds < 0) {
           setTimePassed('00:00:00');
           return;
         }
-
-        const totalSeconds = Math.floor(elapsed / 1000);
+  
+        // Format the elapsed time into hours, minutes, and seconds
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
-
+  
         const formattedTime = `${String(hours).padStart(2, '0')}:${String(
           minutes,
         ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        setTimePassed(formattedTime);
-
-        // Auto check-out if timePassed exceeds 12:00:00 (43200 seconds)
+  
+        setTimePassed(formattedTime); // Update the time passed state
+  
+        // Check if the time passed exceeds 12 hours (43200 seconds)
         if (totalSeconds >= 43200) {
-          handleCheckOut();
-          clearInterval(interval); // Clear interval once checked out
+          console.log('12 hours reached, auto check-out initiated.');
+          handleCheckOut(); // Call check-out function
+          clearInterval(interval); // Clear the interval once checked out
         }
       }, 1000);
     }
-
+  
+    // Cleanup the interval when the component unmounts or conditions change
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [hasCheckedIn, clockInDateTime]);
-
+  }, [hasCheckedIn, clockInDateTime]); // Run this effect when check-in status or clock-in time changes
+  
   useEffect(() => {
     const updatePakistanTimeAndDate = () => {
       const timeOptions = {
@@ -214,40 +159,41 @@ const HomeScreen = ({route}) => {
       Alert.alert('Already Checked In', 'You have already checked in.');
       return;
     }
-
+  
     try {
+      setLoading(true);
+  
       const response = await axios.post(
-        'https://hrmfiles.com/api/attendance/checkinlocation',
+        'https://hrmfiles.com/api/attendance/checkin',
         {
           employee_id: userData.data.employee_id,
-          latitude: userCurrentLocation.latitude,
-          longitude: userCurrentLocation.longitude,
+    
         },
         {
           headers: {
             Authorization: `Bearer ${userData.access_token}`,
           },
-        },
+        }
       );
-
+  
       if (response.data && response.data.message === 'Check-in successful') {
-        const {check_in_time, time_passed, clock_in_date} =
-          response.data.employee; // Corrected access to employee object
-        const clockInDateTimeString = `${clock_in_date}T${check_in_time}`;
-        const clockInDateTime = new Date(clockInDateTimeString);
-
-        // Update states
+        const { check_in_time, time_passed } = response.data.employee;
+  
+        // Format and store check-in time
+        const now = new Date();
         setClockInTime(check_in_time);
         setTimePassed(time_passed);
-        setClockInDateTime(clockInDateTime); // Ensure this is set correctly
-
-        // Save clockInDateTime and checkInStatus to AsyncStorage
-        await AsyncStorage.setItem('clockInDateTime', clockInDateTimeString);
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true)); // Save status
+        setClockInDateTime(now);
+  
+        // Save check-in data to AsyncStorage
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
+        await AsyncStorage.setItem('clockInDateTime', now.toISOString());
+        await AsyncStorage.setItem('clockInTime', check_in_time);
+  
         setHasCheckedIn(true);
         Alert.alert('Check-In Successful', 'You have successfully checked in.');
       } else {
-        Alert.alert('Check-In Failed', 'Please try again later.');
+        Alert.alert('Check-In Failed', 'Unable to complete check-in. Try again.');
       }
     } catch (error) {
       console.error('Check-In Error:', error.response?.data || error.message);
@@ -256,6 +202,9 @@ const HomeScreen = ({route}) => {
       setLoading(false);
     }
   };
+  
+  
+  
 
   // Function to handle Check-Out
   const handleCheckOut = async () => {
@@ -301,7 +250,7 @@ const HomeScreen = ({route}) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#ffffff" />
+        <ActivityIndicator size="large" color="#CA282C" />
       </View>
     );
   }

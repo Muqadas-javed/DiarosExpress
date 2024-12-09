@@ -81,7 +81,7 @@ const AddExpenseScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={20} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Dashboard</Text>
+        <Text style={styles.headerText}>Add Expense</Text>
       </View>
       <View style={styles.container}>
         <Text style={styles.label}>Title</Text>
@@ -140,7 +140,7 @@ const AddExpenseScreen = ({ navigation }) => {
         {image && <Image source={{ uri: image }} style={styles.image} />}
         <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#CA282C" />
           ) : (
             <Text style={styles.buttonTextadd}>Add Expense</Text>
           )}

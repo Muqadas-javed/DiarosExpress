@@ -152,7 +152,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#CA282C" />
       </View>
     );
   }

@@ -70,7 +70,6 @@ const NotificationScreen = ({route, navigation}) => {
           text: 'Delete',
           onPress: async () => {
             try {
-              // Make DELETE request to remove the notification
               const response = await fetch(
                 `https://hrmfiles.com/api/announcement/${id}`,
                 {
@@ -83,7 +82,6 @@ const NotificationScreen = ({route, navigation}) => {
               );
 
               if (response.ok) {
-                // Update local state if deletion is successful
                 setNotifications(prevNotifications =>
                   prevNotifications.filter(
                     notification => notification.id !== id,
@@ -155,6 +153,14 @@ const NotificationScreen = ({route, navigation}) => {
             <Ionicons name="chevron-back" size={24} color="black" />
           </TouchableOpacity>
           <Text style={styles.headerText}>Notifications</Text>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('CreateNotification', {userData})
+            }
+            style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add</Text>
+            <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
         {loading ? (
           <ActivityIndicator size="large" color="#CA282C" />
@@ -185,12 +191,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     paddingBottom: 30,
+    justifyContent: 'space-between',
   },
   headerText: {
     fontSize: 20,
-    marginLeft: 10,
     fontWeight: '600',
     color: 'black',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#CA282C',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 'auto',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
   },
   list: {
     paddingBottom: 20,

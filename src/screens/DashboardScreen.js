@@ -14,12 +14,13 @@ const images = {
 };
 
 const data = [
-  { id: '1', image: images.image1, text: 'Leave \n Request' },
-  { id: '2', image: images.image2, text: 'Leave \nDetails' },
-  { id: '3', image: images.image3, text: 'Attendance\nHistory' },
-  { id: '4', image: images.image4, text: 'Payroll\nRegularization' },
-  { id: '5', image: images.image5, text: 'Create\nNotification' },
-  { id: '6', image: images.image6, text: 'Expense\nRegularization' },
+  { id: '1', image: images.image1, text: 'Leave\nDetails' },
+  { id: '2', image: images.image2, text: 'Attendance\nHistory' },
+  { id: '3', image: images.image4, text: 'Payroll\nRegularization' },
+  { id: '4', image: images.image6, text: 'Expense\nRegularization' },
+  { id: '5', image: images.image6, text: 'Shifts\nManagement' },
+  { id: '6', image: images.image5, text: 'Rota\nCreations' },
+
 ];
 
 const DashboardScreen = ({ route, navigation }) => {
@@ -27,15 +28,20 @@ const DashboardScreen = ({ route, navigation }) => {
 
 
   const handlePress = text => {
-    if (text.includes('Request')) { 
-      navigation.navigate('LeaveRequest', { userData });
-    } else if (text.includes('Details')) {
+    if (text.includes('Leave\nDetails')) { 
       navigation.navigate('LeaveDetails', { userData });
-    } else if (text.includes('Payroll')) {
+    }  else if (text.includes('Payroll')) {
       navigation.navigate('EmployeeDetails', { userData });
     } else if (text.includes('Attendance\nHistory')) {
       navigation.navigate('ApprovedLeaves', { userData });
-    } else if (text.includes('Create\nNotification')) {
+    } 
+    else if (text.includes('Shifts\nManagement')) {
+      navigation.navigate('Shifts', { userData });
+    }
+    else if (text.includes('Rota\nCreations')) {
+      navigation.navigate('Rota', { userData });
+    } 
+    else if (text.includes('Create\nNotification')) {
       if (userData.data.role === 'Employee') {
         Alert.alert(
           'Unauthorized',
@@ -70,9 +76,9 @@ const DashboardScreen = ({ route, navigation }) => {
   return (
     <ImageBackground source={backgroundImg} style={styles.backgroundImage}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        {/* <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={20} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <Text style={styles.headerText}>Dashboard</Text>
       </View>
       <View style={styles.overlay}>

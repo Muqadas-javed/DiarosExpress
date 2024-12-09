@@ -12,6 +12,8 @@ import CreateNotification from './src/screens/CreateNotification';
 import ShowExpenseScreen from './src/screens/ShowExpenseScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
 import PayslipScreen from './src/screens/PayslipScreen';
+import ShiftScreen from './src/screens/shift';
+import RotaScreen from './src/screens/rota';
 import AppTabs from './src/navigation/AppTabs'; // Import the bottom tabs
 
 const Stack = createStackNavigator();
@@ -31,6 +33,9 @@ const App = () => {
         <Stack.Screen name="ShowExpense" component={ShowExpenseScreen} options={{ headerShown: false }}/> 
         <Stack.Screen name="AddExpense" component={AddExpenseScreen}  options={{ headerShown: false }}/>
         <Stack.Screen name="Payslip" component={PayslipScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Shifts" component={ShiftScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Rota" component={RotaScreen} options={{ headerShown: false }}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );
