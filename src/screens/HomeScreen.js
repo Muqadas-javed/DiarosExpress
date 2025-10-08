@@ -11,21 +11,22 @@ import {
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
-import React, {useState, useEffect} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import Sound from 'react-native-sound';
 
-// Import your images
+// Images
 import backgroundImg from '../assets/background.png';
-import circle1 from '../assets/circle1.png';
-import circle2 from '../assets/circle2.png';
 import hand from '../assets/hand.png';
 import punchOutImage from '../assets/punchout.png';
-import frontImage from '../assets/Front.png';
 import clock from '../assets/clock.png';
 import clock1 from '../assets/clock1.png';
 
-const HomeScreen = ({route}) => {
-  const {userData} = route.params || {};
+Sound.setCategory('Playback');
+
+const HomeScreen = ({ route }) => {
+  const { userData } = route.params || {};
   const navigation = useNavigation();
 
   const [loading, setLoading] = useState(false);
@@ -34,91 +35,96 @@ const HomeScreen = ({route}) => {
   const [pakistanDate, setPakistanDate] = useState('');
   const [pakistanTime, setPakistanTime] = useState('');
   const [timePassed, setTimePassed] = useState('00:00:00');
-
   const [clockInTime, setClockInTime] = useState('');
 
-  
-  
+  const playCheckInSound = () => {
+    const sound = new Sound(require('../assets/Booster.wav'), Sound.MAIN_BUNDLE, (error) => {
+      if (error) {
+        console.log('Check-in Sound Load Error:', error);
+        return;
+      }
+      sound.setVolume(1.0);
+      sound.play(() => sound.release());
+    });
+  };
 
-  
+  const playCheckOutSound = () => {
+    const sound = new Sound(require('../assets/Booster.wav'), Sound.MAIN_BUNDLE, (error) => {
+      if (error) {
+        console.log('Check-out Sound Load Error:', error);
+        return;
+      }
+      sound.setVolume(1.0);
+      sound.play(() => sound.release());
+    });
+  };
+
   useEffect(() => {
     const loadCheckInStatus = async () => {
       try {
         const status = await AsyncStorage.getItem('checkInStatus');
         const storedClockInDateTime = await AsyncStorage.getItem('clockInDateTime');
-        const storedClockInTime = await AsyncStorage.getItem('clockInTime'); // Retrieve clock_in_time from AsyncStorage
-  
+        const storedClockInTime = await AsyncStorage.getItem('clockInTime');
+
         if (status !== null) {
           const checkedIn = JSON.parse(status);
           setHasCheckedIn(checkedIn);
-  
-          // If checked in, retrieve clockInDateTime and clockInTime
+
           if (checkedIn && storedClockInDateTime) {
             const clockInDateTime = new Date(storedClockInDateTime);
             setClockInDateTime(clockInDateTime);
           }
-  
-          // Set clockInTime from AsyncStorage if available
+
           if (storedClockInTime) {
-            setClockInTime(storedClockInTime); // Update clockInTime state
+            setClockInTime(storedClockInTime);
           }
         }
       } catch (error) {
-        console.error('Failed to load check-in status or clock-in time:', error);
+        console.error('Failed to load check-in data:', error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     loadCheckInStatus();
   }, []);
-  
-  // calculating time pass
+
   useEffect(() => {
     let interval = null;
-  
+
     if (hasCheckedIn && clockInDateTime) {
       interval = setInterval(() => {
         const now = new Date();
-        const elapsed = now - clockInDateTime; // in milliseconds
-  
-        // Calculate the total seconds elapsed
-        const totalSeconds = Math.floor(elapsed / 1000); 
-  
-        // Log the elapsed time in seconds
-        // console.log('Elapsed Time (seconds):', totalSeconds);
-  
+        const elapsed = now - clockInDateTime;
+        const totalSeconds = Math.floor(elapsed / 1000);
+
         if (totalSeconds < 0) {
           setTimePassed('00:00:00');
           return;
         }
-  
-        // Format the elapsed time into hours, minutes, and seconds
+
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
-  
+
         const formattedTime = `${String(hours).padStart(2, '0')}:${String(
-          minutes,
+          minutes
         ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  
-        setTimePassed(formattedTime); // Update the time passed state
-  
-        // Check if the time passed exceeds 12 hours (43200 seconds)
-        if (totalSeconds >= 43200) {
-          console.log('12 hours reached, auto check-out initiated.');
-          handleCheckOut(); // Call check-out function
-          clearInterval(interval); // Clear the interval once checked out
+
+        setTimePassed(formattedTime);
+        if (totalSeconds >= 1000) {
+          console.log('10 hours reached, auto check-out.');
+          handleCheckOut();
+          clearInterval(interval);
         }
       }, 1000);
     }
-  
-    // Cleanup the interval when the component unmounts or conditions change
+
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [hasCheckedIn, clockInDateTime]); // Run this effect when check-in status or clock-in time changes
-  
+  }, [hasCheckedIn, clockInDateTime]);
+
   useEffect(() => {
     const updatePakistanTimeAndDate = () => {
       const timeOptions = {
@@ -153,21 +159,19 @@ const HomeScreen = ({route}) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Function to handle Check-In
   const handleCheckIn = async () => {
     if (hasCheckedIn) {
       Alert.alert('Already Checked In', 'You have already checked in.');
       return;
     }
-  
+
     try {
       setLoading(true);
-  
+
       const response = await axios.post(
-        'https://hrmfiles.com/api/attendance/checkin',
+        'https://mayfaircareagency.uk/api/attendance/checkin',
         {
           employee_id: userData.data.employee_id,
-    
         },
         {
           headers: {
@@ -175,43 +179,38 @@ const HomeScreen = ({route}) => {
           },
         }
       );
-  
+
       if (response.data && response.data.message === 'Check-in successful') {
         const { check_in_time, time_passed } = response.data.employee;
-  
-        // Format and store check-in time
+
         const now = new Date();
         setClockInTime(check_in_time);
         setTimePassed(time_passed);
         setClockInDateTime(now);
-  
-        // Save check-in data to AsyncStorage
+
         await AsyncStorage.setItem('checkInStatus', JSON.stringify(true));
         await AsyncStorage.setItem('clockInDateTime', now.toISOString());
         await AsyncStorage.setItem('clockInTime', check_in_time);
-  
+
         setHasCheckedIn(true);
+        playCheckInSound();
         Alert.alert('Check-In Successful', 'You have successfully checked in.');
       } else {
-        Alert.alert('Check-In Failed', 'Unable to complete check-in. Try again.');
+        Alert.alert('Check-In Failed', 'Unable to complete check-in.');
       }
     } catch (error) {
       console.error('Check-In Error:', error.response?.data || error.message);
-      Alert.alert('Check-In Error', 'An error occurred during check-in.');
+      Alert.alert('Check-In Error', 'An error occurred.');
     } finally {
       setLoading(false);
     }
   };
-  
-  
-  
 
-  // Function to handle Check-Out
   const handleCheckOut = async () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        'https://hrmfiles.com/api/attendance/checkout',
+        'https://mayfaircareagency.uk/api/attendance/checkout',
         {
           employee_id: userData.data.employee_id,
         },
@@ -219,38 +218,39 @@ const HomeScreen = ({route}) => {
           headers: {
             Authorization: `Bearer ${userData.access_token}`,
           },
-        },
+        }
       );
 
       if (response.data && response.data.message === 'Check-out successful') {
         setHasCheckedIn(false);
         setClockInTime('');
         setTimePassed('00:00:00');
-        await AsyncStorage.setItem('checkInStatus', JSON.stringify(false)); // Save status
-        setClockInTime('');
-        setTimePassed('00:00:00');
+        await AsyncStorage.setItem('checkInStatus', JSON.stringify(false));
+        playCheckOutSound();
         Alert.alert('Checked Out', 'You have successfully checked out.');
       } else {
         Alert.alert('Check-out failed', 'Please try again later.');
       }
     } catch (error) {
       console.error('Check-out Error:', error);
-      Alert.alert(
-        'Check-out Error',
-        'An error occurred while checking out. Please try again later.',
-      );
+      Alert.alert('Check-out Error', 'An error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
-  const imageUrl =
-    userData.data.image_url || 'https://example.com/fallback-image.png';
+  const totalAllowedSeconds = 36000;
+  const timePassedSeconds = timePassed
+    .split(':')
+    .reduce((acc, val, i) => acc + parseInt(val) * [3600, 60, 1][i], 0);
+  const progressPercentage = Math.min((timePassedSeconds / totalAllowedSeconds) * 100, 100);
+
+  const imageUrl = userData.data.image_url || 'https://example.com/fallback-image.png';
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#CA282C" />
+        <ActivityIndicator size="large" color="#00557a" />
       </View>
     );
   }
@@ -259,35 +259,46 @@ const HomeScreen = ({route}) => {
     <ImageBackground source={backgroundImg} style={styles.backgroundImage}>
       <View style={styles.container}>
         <View style={styles.profileContainer}>
-          <Image source={{uri: imageUrl}} style={styles.image} />
+          <Image source={{ uri: imageUrl }} style={styles.image} />
           <View style={styles.profile}>
             <Text style={styles.userName}>HEY {userData.data.name}</Text>
             <Text style={styles.userRole}>{userData.data.role}</Text>
           </View>
           <TouchableOpacity
             style={styles.notificationIcon}
-            onPress={() => navigation.navigate('Notifications', {userData})}>
-            <Ionicons name="notifications" size={28} color="#CA282C" />
+            onPress={() => navigation.navigate('Notifications', { userData })}
+          >
+            <Ionicons name="notifications" size={28} color="#00557a" />
           </TouchableOpacity>
         </View>
+
         <Text style={styles.timeText}>{pakistanTime}</Text>
         <Text style={styles.dateText}>{pakistanDate}</Text>
 
-        <TouchableOpacity
-          style={styles.punchInButton}
-          onPress={hasCheckedIn ? handleCheckOut : handleCheckIn}>
-          <Image source={circle1} style={styles.circle1Image} />
-          <Image source={circle2} style={styles.circle2Image} />
-          <Text style={styles.punchInText}>
-            {hasCheckedIn ? 'PUNCH OUT' : 'PUNCH IN'}
-          </Text>
-          <Image
-            source={hasCheckedIn ? punchOutImage : hand}
-            style={styles.handImage}
-          />
-          {hasCheckedIn && (
-            <Image source={frontImage} style={styles.frontImage} />
-          )}
+        <TouchableOpacity style={styles.punchInButton} onPress={hasCheckedIn ? handleCheckOut : handleCheckIn}>
+          <AnimatedCircularProgress
+            size={190}
+            width={12}
+            fill={progressPercentage}
+            tintColor="#00557a"
+            backgroundColor="#f2f2f2"
+            rotation={0}
+          >
+            {
+              () => (
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={styles.punchInText}>
+                    {hasCheckedIn ? 'PUNCH OUT' : 'PUNCH IN'}
+                  </Text>
+                  <Image
+                    source={hasCheckedIn ? punchOutImage : hand}
+                    style={styles.handImage}
+                  />
+
+                </View>
+              )
+            }
+          </AnimatedCircularProgress>
         </TouchableOpacity>
 
         <View style={styles.clockRow}>
@@ -319,7 +330,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: 'center',
-    alignContent: 'center',
   },
   profileContainer: {
     marginTop: 10,
@@ -341,13 +351,8 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     position: 'absolute',
-    left: 290,
+    left: 250,
     top: -10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
   },
   image: {
     width: 70,
@@ -368,37 +373,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: 'center',
   },
-  circle1Image: {
-    position: 'absolute',
-    width: 190,
-    height: 190,
-    top: 20,
-  },
-  circle2Image: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    top: 40,
-  },
   punchInText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 140,
+    marginTop: 10,
   },
   handImage: {
-    position: 'absolute',
     width: 40,
     height: 60,
-    top: 70,
+    marginTop: 10,
   },
-  frontImage: {
-    position: 'absolute',
-    width: 190,
-    height: 195,
-    top: 20,
-  },
-  // Styles for the clock row and images
   clockRow: {
     flexDirection: 'row',
     marginTop: 105,
@@ -420,7 +405,6 @@ const styles = StyleSheet.create({
   clockContainer: {
     alignItems: 'center',
   },
-
   clockText: {
     color: '#666',
   },

@@ -1,5 +1,5 @@
 // src/screens/HistoryScreen.js
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import backgroundImg from '../assets/background.png';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 const CustomAlert = ({
   visible,
   onClose,
@@ -44,8 +44,8 @@ const CustomAlert = ({
   );
 };
 
-const HistoryScreen = ({route}) => {
-  const {userData} = route.params || {};
+const HistoryScreen = ({ route }) => {
+  const { userData } = route.params || {};
   const imageUrl =
     userData?.data?.image_url || 'https://example.com/fallback-image.png';
   const [alertType, setAlertType] = useState('');
@@ -72,9 +72,9 @@ const HistoryScreen = ({route}) => {
     <ImageBackground source={backgroundImg} style={styles.backgroundImage}>
       <View style={styles.container}>
         <View style={styles.imageWrapper}>
-          <Image source={{uri: imageUrl}} style={styles.image} />
+          <Image source={{ uri: imageUrl }} style={styles.image} />
           <View style={styles.circle}>
-            <Image source={{uri: imageUrl}} style={styles.image} />
+            <Image source={{ uri: imageUrl }} style={styles.image} />
           </View>
         </View>
         <View style={styles.userinfo}>
@@ -86,7 +86,7 @@ const HistoryScreen = ({route}) => {
             style={styles.buttonContainer}
             onPress={handleTermsModalOpen}>
             <View style={styles.iconBtn}>
-              <Icon name={'shield-checkmark'} size={18} color="#CA282C" />
+              <Icon name={'shield-checkmark'} size={18} color="#00557a" />
               <Text style={styles.buttonText}>Privacy Policy</Text>
               <Icon
                 name={'chevron-forward'}
@@ -100,7 +100,7 @@ const HistoryScreen = ({route}) => {
             style={styles.buttonContainer}
             onPress={handleTermsModalOpen}>
             <View style={styles.iconBtn}>
-              <Icon name={'reader-sharp'} size={18} color="#CA282C" />
+              <Icon name={'reader-sharp'} size={18} color="#00557a" />
               <Text style={styles.buttonText}>Terms and Conditions</Text>
               <Icon
                 name={'chevron-forward'}
@@ -117,7 +117,7 @@ const HistoryScreen = ({route}) => {
               setAlertVisible(true);
             }}>
             <View style={styles.iconBtn}>
-              <Icon name={'trash-bin-sharp'} size={18} color="#CA282C" />
+              <Icon name={'trash-bin-sharp'} size={18} color="#00557a" />
               <Text style={styles.buttonText}>Delete Account</Text>
               <Icon
                 name={'chevron-forward'}
@@ -134,7 +134,7 @@ const HistoryScreen = ({route}) => {
               setAlertVisible(true);
             }}>
             <View style={styles.iconBtn}>
-              <Icon name={'log-out'} size={18} color="#CA282C" />
+              <Icon name={'log-out'} size={18} color="#00557a" />
               <Text style={styles.buttonText}>Log Out</Text>
               <Icon
                 name={'chevron-forward'}
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 65,
     borderWidth: 4,
-    borderColor: '#CA282C',
+    borderColor: '#00557a',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#CA282C',
+    color: '#00557a',
     fontWeight: 'bold',
     paddingLeft: 10,
     fontSize: 16,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 35,
     paddingBottom: 6,
-    width:'90%',
+    width: '90%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   modalbutton: {
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     borderRadius: 5,
     width: 80,
     alignItems: 'center',

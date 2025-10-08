@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,8 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import backgroundImg from '../assets/background.png';
 
-const LeaveDetailsScreen = ({route, navigation}) => {
-  const {userData} = route.params || {};
+const LeaveDetailsScreen = ({ route, navigation }) => {
+  const { userData } = route.params || {};
   const [leaveData, setLeaveData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +23,7 @@ const LeaveDetailsScreen = ({route, navigation}) => {
 
   const fetchLeaveData = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/leaves', {
+      const response = await fetch('https://mayfaircareagency.uk/api/leaves', {
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
         },
@@ -63,14 +63,14 @@ const LeaveDetailsScreen = ({route, navigation}) => {
       'Delete Request',
       'Are you sure you want to delete this leave request?',
       [
-        {text: 'Cancel', style: 'cancel'},
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
               const response = await fetch(
-                `https://hrmfiles.com/api/leaves/${id}`,
+                `https://mayfaircareagency.uk/api/leaves/${id}`,
                 {
                   method: 'DELETE',
                   headers: {
@@ -96,14 +96,14 @@ const LeaveDetailsScreen = ({route, navigation}) => {
     );
   };
 
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <View style={styles.cardContainer}>
       <View style={styles.cardHeader}>
         <View style={styles.iconContainer}>
           <View
             style={[
               styles.statusIcon,
-              {backgroundColor: item.status === '1' ? 'green' : 'orange'},
+              { backgroundColor: item.status === '1' ? 'green' : 'orange' },
             ]}
           />
         </View>
@@ -111,7 +111,7 @@ const LeaveDetailsScreen = ({route, navigation}) => {
         <TouchableOpacity
           onPress={() => handleDelete(item.leave_id)}
           style={styles.deleteIcon}>
-          <Ionicons name="trash" size={20} color="#CA282C" />
+          <Ionicons name="trash" size={20} color="#00557a" />
         </TouchableOpacity>
       </View>
       <Text style={styles.details}>
@@ -140,13 +140,13 @@ const LeaveDetailsScreen = ({route, navigation}) => {
           {/* Add Button */}
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => navigation.navigate('LeaveRequest', {userData})}>
+            onPress={() => navigation.navigate('LeaveRequest', { userData })}>
             <Text style={styles.addButtonText}>ADD</Text>
             <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" />
+          <ActivityIndicator size="large" color="#00557a" />
         ) : leaveData.length === 0 ? (
           <Text style={styles.noRecordText}>No leave record found</Text>
         ) : (
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 8,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -250,12 +250,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   pending: {
-    color: '#CA282C',
+    color: '#00557a',
     fontWeight: 'bold',
   },
   noRecordText: {
     fontSize: 20,
-    color: '#CA282C',
+    color: '#00557a',
     textAlign: 'center',
     marginTop: 280,
     fontWeight: 'bold',

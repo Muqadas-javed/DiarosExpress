@@ -14,7 +14,7 @@ const ShowExpenseScreen = ({ navigation }) => {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/expense');
+      const response = await fetch('https://mayfaircareagency.uk/api/expense');
       const result = await response.json();
       if (result.success) {
         setExpenses(result.data);
@@ -31,7 +31,7 @@ const ShowExpenseScreen = ({ navigation }) => {
   const deleteExpense = async (id) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://hrmfiles.com/api/expense/${id}`, {
+      const response = await fetch(`https://mayfaircareagency.uk/api/expense/${id}`, {
         method: 'DELETE',
       });
       const result = await response.json();
@@ -90,7 +90,7 @@ const ShowExpenseScreen = ({ navigation }) => {
       </View>
       <View style={styles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" style={styles.loader} />
+          <ActivityIndicator size="large" color="#00557a" style={styles.loader} />
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -161,8 +161,8 @@ const styles = StyleSheet.create({
   itemImage: {
     width: '100%',
     height: 90,
-    resizeMode:'contain',
-    borderRadius:40,
+    resizeMode: 'contain',
+    borderRadius: 40,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   },
   itemPrice: {
     fontSize: 16,
-    color: '#CA282C',
+    color: '#00557a',
     marginVertical: 5,
   },
   itemDate: {

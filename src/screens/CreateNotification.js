@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,8 @@ import backgroundImg from '../assets/background.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DatePicker from 'react-native-date-picker';
 
-const CreateNotification = ({route, navigation}) => {
-  const {userData} = route.params || {};
+const CreateNotification = ({ route, navigation }) => {
+  const { userData } = route.params || {};
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [date, setDate] = useState(null);
@@ -25,7 +25,7 @@ const CreateNotification = ({route, navigation}) => {
       return;
     }
     try {
-      const response = await fetch('https://hrmfiles.com/api/announcement', {
+      const response = await fetch('https://mayfaircareagency.uk/api/announcement', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   submitButton: {
-    backgroundColor: '#ca282c',
+    backgroundColor: '#00557a',
     paddingVertical: 15,
     borderRadius: 10,
     marginVertical: 40,

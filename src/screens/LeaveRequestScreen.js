@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DatePicker from 'react-native-date-picker';
 import axios from 'axios';
 
-const LeaveRequestScreen = ({route, navigation}) => {
-  const {userData} = route.params || {};
+const LeaveRequestScreen = ({ route, navigation }) => {
+  const { userData } = route.params || {};
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [openDatePicker, setOpenDatePicker] = useState(false);
@@ -27,9 +27,9 @@ const LeaveRequestScreen = ({route, navigation}) => {
   const [isToDateSelected, setIsToDateSelected] = useState(false);
 
   const [items] = useState([
-    {label: 'Sick Leave', value: 'SICK'},
-    {label: 'Vacation Leave', value: 'VACATION'},
-    {label: 'Maternity Leave', value: 'MATERNITY'},
+    { label: 'Sick Leave', value: 'SICK' },
+    { label: 'Vacation Leave', value: 'VACATION' },
+    { label: 'Maternity Leave', value: 'MATERNITY' },
   ]);
   const [selectedLeaveType, setSelectedLeaveType] =
     useState('Select Leave Type');
@@ -76,7 +76,7 @@ const LeaveRequestScreen = ({route, navigation}) => {
 
     try {
       const response = await axios.post(
-        'https://hrmfiles.com/api/leaves',
+        'https://mayfaircareagency.uk/api/leaves',
         {
           leave_type: selectedLeaveType,
           start_date: selectedDate.toISOString().split('T')[0],
@@ -105,9 +105,8 @@ const LeaveRequestScreen = ({route, navigation}) => {
       if (error.response) {
         Alert.alert(
           'Error',
-          `Error: ${
-            error.response.data.message ||
-            'An error occurred. Please try again.'
+          `Error: ${error.response.data.message ||
+          'An error occurred. Please try again.'
           }`,
         );
       }
@@ -123,12 +122,12 @@ const LeaveRequestScreen = ({route, navigation}) => {
           </TouchableOpacity>
           <Text style={styles.headerText}>Leave Request</Text>
         </View>
-        <ScrollView contentContainerStyle={{paddingBottom: 20}}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
           <Text style={styles.label}>Leave Type</Text>
           <TouchableOpacity style={styles.dropdownview} onPress={toggleModal}>
             <View style={styles.dropdownContent}>
               <Text style={styles.dropdownText}>{selectedLeaveType}</Text>
-              <Ionicons name="caret-down" size={16} color="#ca282c" />
+              <Ionicons name="caret-down" size={16} color="#00557a" />
             </View>
           </TouchableOpacity>
           <Modal
@@ -152,7 +151,7 @@ const LeaveRequestScreen = ({route, navigation}) => {
                 <Ionicons
                   name="calendar"
                   size={20}
-                  color="#ca282c"
+                  color="#00557a"
                   style={styles.calendarIcon}
                 />
               </View>
@@ -167,7 +166,7 @@ const LeaveRequestScreen = ({route, navigation}) => {
                 <Ionicons
                   name="calendar"
                   size={20}
-                  color="#ca282c"
+                  color="#00557a"
                   style={styles.calendarIcon}
                 />
               </View>
@@ -211,14 +210,14 @@ const LeaveRequestScreen = ({route, navigation}) => {
                 style={[
                   styles.optionButton,
                   selectedDuration === option.toLowerCase() &&
-                    styles.selectedOption,
+                  styles.selectedOption,
                 ]}
                 onPress={() => handleDurationSelect(option.toLowerCase())}>
                 <Text
                   style={[
                     styles.optionText,
                     selectedDuration === option.toLowerCase() &&
-                      styles.selectedOptionText,
+                    styles.selectedOptionText,
                   ]}>
                   {option}
                 </Text>
@@ -336,7 +335,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   selectedOption: {
-    backgroundColor: '#ca282c',
+    backgroundColor: '#00557a',
   },
   optionText: {
     fontSize: 16,
@@ -355,7 +354,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   submitButton: {
-    backgroundColor: '#ca282c',
+    backgroundColor: '#00557a',
     paddingVertical: 15,
     borderRadius: 10,
     marginVertical: 50,

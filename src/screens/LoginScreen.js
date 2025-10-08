@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   Alert,
+  Image,
   ImageBackground,
   TouchableOpacity,
 } from 'react-native';
@@ -12,6 +13,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import backgroundImg from '../assets/background.png';
+import mayfair from '../assets/myfair.png';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -25,11 +27,11 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
     try {
-      const response = await axios.post('https://hrmfiles.com/api/login', {
+      const response = await axios.post('https://mayfaircareagency.uk/api/login', {
         email,
         password,
       });
-  
+
       if (response.data && response.data.access_token) {
         navigation.navigate('AppTabs', { userData: response.data }); // Pass userData here
       } else {
@@ -40,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Login Error', 'An error occurred during login. Please try again later.');
     }
   };
-  
+
   return (
     <ImageBackground source={backgroundImg} style={styles.backgroundImage}>
       <KeyboardAwareScrollView
@@ -48,8 +50,7 @@ const LoginScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled">
         <View style={styles.container}>
           {/* <Text style={styles.welcomeText}>Welcome to </Text> */}
-          <Text style={styles.companyname}>DiarosExpress</Text>
-
+          <Image source={mayfair} style={styles.logoImage} resizeMode="contain" />
           <Text style={styles.title}>Email</Text>
           <View style={styles.inputContainer}>
             <TextInput
@@ -111,18 +112,22 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 34,
-    color: '#ca282c',
+    color: '#00557a',
     fontWeight: '400',
     width: '100%',
     textAlign: 'center',
     paddingTop: 20, // Add some space from the top
   },
-  companyname:{
+  companyname: {
     fontSize: 44,
     fontWeight: '900',
-
-    color: '#ca282c',
+    color: '#00557a',
     marginBottom: 90,
+  },
+  logoImage: {
+    width: 280,
+    height: 180,
+    marginBottom: 20,
   },
   title: {
     fontSize: 16,
@@ -153,7 +158,7 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   loginButton: {
-    backgroundColor: '#ca282c',
+    backgroundColor: '#00557a',
     padding: 15,
     borderRadius: 30,
     width: '70%',

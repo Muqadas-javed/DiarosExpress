@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,13 +8,13 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from 'react-native';
-import {Calendar} from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 import backgroundImg from '../assets/background.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ApprovedLeavesScreen = ({route, navigation}) => {
-  const {userData} = route.params || {};
+const ApprovedLeavesScreen = ({ route, navigation }) => {
+  const { userData } = route.params || {};
 
   const [markedDates, setMarkedDates] = useState({});
   const [presentDaysDetails, setPresentDaysDetails] = useState([]);
@@ -24,7 +24,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
     const fetchAttendanceData = async () => {
       try {
         const response = await axios.get(
-          'https://hrmfiles.com/api/attendance',
+          'https://mayfaircareagency.uk/api/attendance',
           {
             headers: {
               Authorization: `Bearer ${userData?.access_token}`,
@@ -44,7 +44,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
           const date = absentDays[key];
           markedDates[date] = {
             selected: true,
-            selectedColor: '#CA282C',
+            selectedColor: '#00557a',
             selectedTextColor: 'white',
           };
         }
@@ -89,15 +89,15 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
 
   const formatDate = date => {
     const dateObj = new Date(date);
-    const dayNameOptions = {weekday: 'short'};
-    const dayNumberOptions = {day: '2-digit'}; // Ensure two-digit format
+    const dayNameOptions = { weekday: 'short' };
+    const dayNumberOptions = { day: '2-digit' }; // Ensure two-digit format
 
     const dayName = dateObj.toLocaleDateString('en-US', dayNameOptions);
     const dayNumber = dateObj
       .toLocaleDateString('en-US', dayNumberOptions)
       .padStart(2, '0'); // Ensure two-digit format
 
-    return {dayName, dayNumber};
+    return { dayName, dayNumber };
   };
 
   const formatTime = time => {
@@ -152,7 +152,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#CA282C" />
+        <ActivityIndicator size="large" color="#00557a" />
       </View>
     );
   }
@@ -171,15 +171,15 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
             markedDates={markedDates}
             markingType={'simple'}
             theme={{
-              todayTextColor: '#CA282C',
-              arrowColor: '#CA282C',
+              todayTextColor: '#00557a',
+              arrowColor: '#00557a',
             }}
           />
           <FlatList
             data={presentDaysDetails}
             keyExtractor={item => item.date}
-            renderItem={({item}) => {
-              const {dayName, dayNumber} = item.formattedDate;
+            renderItem={({ item }) => {
+              const { dayName, dayNumber } = item.formattedDate;
               const backgroundColor = isToday(item.date)
                 ? '#E89C1E'
                 : '#6FAB55'; // Orange for today, green for previous days
@@ -187,7 +187,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
               return (
                 <View style={styles.card}>
                   <View style={styles.row}>
-                    <View style={[styles.dateContainer, {backgroundColor}]}>
+                    <View style={[styles.dateContainer, { backgroundColor }]}>
                       <Text style={styles.dateText}>{dayNumber}</Text>
                       <Text style={styles.dayName}>{dayName}</Text>
                     </View>
@@ -208,7 +208,7 @@ const ApprovedLeavesScreen = ({route, navigation}) => {
               );
             }}
             style={styles.list}
-            contentContainerStyle={{flexGrow: 1}} // Ensure the FlatList is scrollable
+            contentContainerStyle={{ flexGrow: 1 }} // Ensure the FlatList is scrollable
           />
         </View>
       </View>
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     elevation: 2, // for shadow on Android
     shadowColor: '#000', // for shadow on iOS
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },

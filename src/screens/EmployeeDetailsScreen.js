@@ -20,7 +20,7 @@ const EmployeeDetailsScreen = ({ route, navigation }) => {
   // Fetch payroll data from the API
   const fetchPayrollData = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/payslip-uploads', {
+      const response = await fetch('https://mayfaircareagency.uk/api/payslip-uploads', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
@@ -68,11 +68,11 @@ const EmployeeDetailsScreen = ({ route, navigation }) => {
           <Ionicons name="chevron-back" size={26} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Payslip Details</Text>
-        
+
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#CA282C" />
+        <ActivityIndicator size="large" color="#00557a" />
       ) : (
         <FlatList
           data={payrollData}
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   pdfButton: {
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,

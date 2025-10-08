@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -16,8 +16,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import backgroundImg from '../assets/background.png';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
-const PayslipScreen = ({route, navigation}) => {
-  const {itemId, userData} = route.params || {}; // Get itemId and userData from route params
+const PayslipScreen = ({ route, navigation }) => {
+  const { itemId, userData } = route.params || {}; // Get itemId and userData from route params
   const [payslipData, setPayslipData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ const PayslipScreen = ({route, navigation}) => {
   const fetchPayslipData = async () => {
     try {
       const response = await fetch(
-        `https://hrmfiles.com/api/payslip/${itemId}`,
+        `https://mayfaircareagency.uk/api/payslip/${itemId}`,
         {
           headers: {
             Authorization: `Bearer ${userData?.access_token}`,
@@ -63,8 +63,7 @@ const PayslipScreen = ({route, navigation}) => {
           <p style="font-size: 24px; color: #555;">Civic Center Bahria Phase 4</p>
         </div>
         
-        <h2 style="font-size: 40px; color: #CA282C; margin-bottom: 50px; font-weight: bold;">${
-          payslipData?.name || 'N/A'
+        <h2 style="font-size: 40px; color: #CA282C; margin-bottom: 50px; font-weight: bold;">${payslipData?.name || 'N/A'
         }</h2>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
           <tr style="background-color: #CA282C; color: white;">
@@ -75,43 +74,35 @@ const PayslipScreen = ({route, navigation}) => {
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Salary</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.salary || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.salary || 'N/A'
+        }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Deduction Per Day</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.absent_days_deduction || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.absent_days_deduction || 'N/A'
+        }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Absent Days</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.total_absent_days
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.total_absent_days
+        }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Deduction Per Hour</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.Late_hours_deduction || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.Late_hours_deduction || 'N/A'
+        }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Leave Days</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.paid_leaves
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.paid_leaves
+        }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Total Deduction</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.total_deduction || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.total_deduction || 'N/A'
+        }</td>
           </tr>
           <tr>
             <td style="border: 1px solid #ddd; padding: 14px;">Bonus</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.bonus || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.bonus || 'N/A'
+        }</td>
             <td style="border: 1px solid #ddd; padding: 14px;">Net Salary</td>
-            <td style="border: 1px solid #ddd; padding: 14px;">${
-              payslipData?.net_salary || 'N/A'
-            }</td>
+            <td style="border: 1px solid #ddd; padding: 14px;">${payslipData?.net_salary || 'N/A'
+        }</td>
           </tr>
         </table>
         <div style="text-align: right; margin-bottom: 100px;font-size: 34px font-weight: medium">
@@ -159,7 +150,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="cash-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -171,7 +162,7 @@ const PayslipScreen = ({route, navigation}) => {
           <FontAwesome
             name="gift"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -182,7 +173,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="close-circle-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -196,7 +187,7 @@ const PayslipScreen = ({route, navigation}) => {
           <MaterialIcons
             name="access-time"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -210,7 +201,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="remove-circle-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -224,7 +215,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="calendar-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -238,7 +229,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="checkmark-done-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -250,7 +241,7 @@ const PayslipScreen = ({route, navigation}) => {
           <Ionicons
             name="wallet-outline"
             size={20}
-            color="#CA282C"
+            color="#00557a"
             style={styles.icon}
           />
           <Text style={styles.detailText}>
@@ -271,12 +262,12 @@ const PayslipScreen = ({route, navigation}) => {
           </TouchableOpacity>
           <Text style={styles.headerText}>Payslip </Text>
           <TouchableOpacity onPress={generatePDF} style={styles.downloadButton}>
-            <Entypo name="download" size={26} color="#CA282C" />
+            <Entypo name="download" size={26} color="#00557a" />
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" />
+          <ActivityIndicator size="large" color="#00557a" />
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Error: {error}</Text>
@@ -323,7 +314,7 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
@@ -333,7 +324,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#CA282C',
+    color: '#00557a',
     marginBottom: 10,
     textAlign: 'center',
   },

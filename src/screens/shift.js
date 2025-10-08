@@ -21,7 +21,7 @@ const RotaScreen = ({ route, navigation }) => {
 
   const fetchShifts = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/shifts', {
+      const response = await fetch('https://mayfaircareagency.uk/api/shifts', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
@@ -143,7 +143,7 @@ const RotaScreen = ({ route, navigation }) => {
         />
 
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" />
+          <ActivityIndicator size="large" color="#00557a" />
         ) : (
           <FlatList
             data={shifts}
@@ -167,10 +167,10 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   backgroundImage: { flex: 1, resizeMode: 'cover' },
-  listContainer: { paddingBottom: 20,  backgroundColor: 'white', },
+  listContainer: { paddingBottom: 20, backgroundColor: 'white', },
   calendar: { marginBottom: 0 },
   card: { backgroundColor: '#f9f9f9', marginVertical: 8, padding: 10, borderRadius: 8 },
-  row: { flexDirection: 'row', alignItems: 'center',  },
+  row: { flexDirection: 'row', alignItems: 'center', },
   dateContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   cardDetails: { flex: 1, marginLeft: 10 },
   shiftType: { fontSize: 16, fontWeight: 'bold', color: '#000' },
   shiftTime: { fontSize: 14, fontWeight: 'bold', color: '#555' },
-  cardText: { fontSize: 14 ,color: '#999'},
+  cardText: { fontSize: 14, color: '#999' },
   cardNote: { fontSize: 12, color: '#999' },
   statusContainer: {
     justifyContent: 'center',

@@ -20,7 +20,7 @@ const RotaScreen = ({ route, navigation }) => {
   // Fetch data from the API
   const fetchData = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/rotas', {
+      const response = await fetch('https://mayfaircareagency.uk/api/rotas', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
@@ -56,7 +56,7 @@ const RotaScreen = ({ route, navigation }) => {
   // Function to handle accepting a shift
   const acceptShift = async (shiftId) => {
     try {
-      const response = await fetch(`https://hrmfiles.com/api/shift/accept/${shiftId}`, {
+      const response = await fetch(`https://mayfaircareagency.uk/api/shift/accept/${shiftId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
@@ -87,7 +87,7 @@ const RotaScreen = ({ route, navigation }) => {
   // Function to handle rejecting a shift
   const rejectShift = async (shiftId) => {
     try {
-      const response = await fetch(`https://hrmfiles.com/api/shift/reject/${shiftId}`, {
+      const response = await fetch(`https://mayfaircareagency.uk/api/shift/reject/${shiftId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${userData?.access_token}`,
@@ -163,8 +163,8 @@ const RotaScreen = ({ route, navigation }) => {
                 <Text style={styles.dateMonth}>{month}</Text>
               </View>
               <View style={styles.cardDetails}>
-              <Text style={styles.shiftType}>{shift.shift_type.toUpperCase()}</Text>
-              <Text style={styles.shiftTime}>
+                <Text style={styles.shiftType}>{shift.shift_type.toUpperCase()}</Text>
+                <Text style={styles.shiftTime}>
                   {shift.start_time} - {shift.end_time}
                 </Text>
                 <Text style={styles.cardText}>{shift.add_duty}</Text>
@@ -234,7 +234,7 @@ const RotaScreen = ({ route, navigation }) => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" />
+          <ActivityIndicator size="large" color="#00557a" />
         ) : (
           <FlatList
             data={data}
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   shiftType: {
-     // Reduced padding top
+    // Reduced padding top
     fontSize: 16, // Slightly smaller font size
     fontWeight: 'bold',
     color: '#000',
@@ -348,8 +348,8 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 10, // Reduced font size for status text
     textAlign: 'center',
-   paddingHorizontal: 12,
-    paddingVertical: 4, 
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
   accepted: {
     color: 'green',
@@ -394,13 +394,13 @@ const styles = StyleSheet.create({
   leaveCard: {
     backgroundColor: '#F8F8F8',
   },
-  leavetype:{
+  leavetype: {
     paddingTop: 2, // Reduced padding top
     fontSize: 20, // Slightly smaller font size
     fontWeight: 'bold',
     color: '#000',
   },
-  leavereason:{
+  leavereason: {
     paddingTop: 2, // Reduced padding top
     fontSize: 14, // Slightly smaller font size
     color: '#000',

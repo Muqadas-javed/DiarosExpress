@@ -54,7 +54,7 @@ const AddExpenseScreen = ({ navigation }) => {
     });
 
     try {
-      const response = await fetch('https://hrmfiles.com/api/expense', {
+      const response = await fetch('https://mayfaircareagency.uk/api/expense', {
         method: 'POST',
         body: formData,
         headers: {
@@ -135,12 +135,12 @@ const AddExpenseScreen = ({ navigation }) => {
 
         <TouchableOpacity onPress={handleChooseImage} style={styles.imagePickerButton}>
           <Text style={styles.buttonText}>Choose Image</Text>
-          <Ionicons name="camera" size={24} color="#CA282C" />
+          <Ionicons name="camera" size={24} color="#00557a" />
         </TouchableOpacity>
         {image && <Image source={{ uri: image }} style={styles.image} />}
         <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
           {loading ? (
-            <ActivityIndicator color="#CA282C" />
+            <ActivityIndicator color="#00557a" />
           ) : (
             <Text style={styles.buttonTextadd}>Add Expense</Text>
           )}
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'black',
     paddingVertical: 10,
-    paddingLeft:10,
+    paddingLeft: 10,
   },
   textInput: {
     backgroundColor: 'white',
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   submitButton: {
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

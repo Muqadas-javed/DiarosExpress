@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,8 @@ import {
 import backgroundImg from '../assets/background.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const NotificationScreen = ({route, navigation}) => {
-  const {userData} = route.params || {};
+const NotificationScreen = ({ route, navigation }) => {
+  const { userData } = route.params || {};
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +23,7 @@ const NotificationScreen = ({route, navigation}) => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('https://hrmfiles.com/api/announcement', {
+      const response = await fetch('https://mayfaircareagency.uk/api/announcement', {
         headers: {
           Authorization: `Bearer ${userData.access_token}`,
           'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ const NotificationScreen = ({route, navigation}) => {
         Alert.alert(
           'Error',
           'Unable to fetch notifications. The server returned a non-JSON response.',
-          [{text: 'OK'}],
+          [{ text: 'OK' }],
         );
       }
     } catch (error) {
@@ -50,7 +50,7 @@ const NotificationScreen = ({route, navigation}) => {
       Alert.alert(
         'Error',
         'An error occurred while fetching notifications. Please try again later.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const NotificationScreen = ({route, navigation}) => {
           onPress: async () => {
             try {
               const response = await fetch(
-                `https://hrmfiles.com/api/announcement/${id}`,
+                `https://mayfaircareagency.uk/api/announcement/${id}`,
                 {
                   method: 'DELETE',
                   headers: {
@@ -88,13 +88,13 @@ const NotificationScreen = ({route, navigation}) => {
                   ),
                 );
                 Alert.alert('Success', 'Notification deleted successfully.', [
-                  {text: 'OK'},
+                  { text: 'OK' },
                 ]);
               } else {
                 Alert.alert(
                   'Error',
                   'Failed to delete notification. Please try again.',
-                  [{text: 'OK'}],
+                  [{ text: 'OK' }],
                 );
               }
             } catch (error) {
@@ -102,7 +102,7 @@ const NotificationScreen = ({route, navigation}) => {
               Alert.alert(
                 'Error',
                 'An error occurred while deleting the notification. Please try again later.',
-                [{text: 'OK'}],
+                [{ text: 'OK' }],
               );
             }
           },
@@ -111,7 +111,7 @@ const NotificationScreen = ({route, navigation}) => {
     );
   };
 
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }) => {
     const formattedDate = new Date(item.date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -125,10 +125,10 @@ const NotificationScreen = ({route, navigation}) => {
         <View
           style={[
             styles.statusIcon,
-            {backgroundColor: isFutureDate ? 'green' : 'orange'},
+            { backgroundColor: isFutureDate ? 'green' : 'orange' },
           ]}
         />
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.message}>{item.message}</Text>
           <View style={styles.footer}>
@@ -155,7 +155,7 @@ const NotificationScreen = ({route, navigation}) => {
           <Text style={styles.headerText}>Notifications</Text>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('CreateNotification', {userData})
+              navigation.navigate('CreateNotification', { userData })
             }
             style={styles.addButton}>
             <Text style={styles.addButtonText}>Add</Text>
@@ -163,7 +163,7 @@ const NotificationScreen = ({route, navigation}) => {
           </TouchableOpacity>
         </View>
         {loading ? (
-          <ActivityIndicator size="large" color="#CA282C" />
+          <ActivityIndicator size="large" color="#00557a" />
         ) : (
           <FlatList
             data={notifications}
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#CA282C',
+    backgroundColor: '#00557a',
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,

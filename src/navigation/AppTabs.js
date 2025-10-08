@@ -36,7 +36,7 @@ const AppTabs = ({ route }) => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: focused ? '#8B0000' : 'transparent', // Dark red background if focused
+                backgroundColor: focused ? 'grey' : 'transparent', // Dark red background if focused
                 borderRadius: 20,
                 padding: 8,
               }}
@@ -56,7 +56,7 @@ const AppTabs = ({ route }) => {
         tabBarActiveTintColor: '#fff', // Active tint color for icons and labels
         tabBarInactiveTintColor: '#ddd', // Inactive tint color for icons and labels
         tabBarStyle: {
-          backgroundColor: '#CA282C', // Tab bar background color
+          backgroundColor: '#00557a', // Tab bar background color
           borderTopWidth: 0,
           margin: 10,
           height: 60,
